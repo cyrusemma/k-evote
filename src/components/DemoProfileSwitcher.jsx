@@ -61,10 +61,10 @@ export default function DemoProfileSwitcher({ onProfileChange, className = '' })
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
         aria-haspopup="true"
-        title="Switch between Level 100 First-Year and Level 300 Continuing Student demo profiles"
+        title="Switch between Level 100 First-Year and Level 300 Continuing Student profiles"
       >
         <Users size={12} className="text-slate-500 dark:text-slate-400" />
-        <span className="font-semibold text-slate-500 dark:text-slate-400">Demo View:</span>
+        <span className="font-semibold text-slate-500 dark:text-slate-400">Voter Account:</span>
         <span className="font-bold text-slate-800 dark:text-slate-200">
           {activeProfile.shortLabel}
         </span>
@@ -81,10 +81,10 @@ export default function DemoProfileSwitcher({ onProfileChange, className = '' })
           <div className="px-3 py-2 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-550 dark:text-slate-400 flex items-center gap-1.5">
               <Users size={12} className="text-[#007A4D]" />
-              <span>Switch Demo View</span>
+              <span>KNUST Voter Account</span>
             </span>
-            <span className="text-[10px] font-semibold text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full font-mono">
-              Eligibility Simulator
+            <span className="text-[10px] font-semibold text-slate-500 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded-full font-mono border border-emerald-200 dark:border-emerald-800">
+              AIM Portal Active
             </span>
           </div>
 
