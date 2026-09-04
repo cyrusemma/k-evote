@@ -15,8 +15,9 @@ import ToastContainer from './components/ToastContainer';
 import MobileHeader from './components/MobileHeader';
 import useECAuthorization from './hooks/useECAuthorization';
 import { AdminAuthProvider } from './context/AdminAuthContext';
+import KNUSTLogin from './components/KNUSTLogin';
 import { mockElections, mergeWithMockElections, getElectionStatus, checkElectionEligibility, formatUnlockDate } from './lib/eligibility';
-import { getStoredStudentProfile } from './lib/demoProfiles';
+import { getStoredStudentProfile, isUserAuthenticated, signOutUser } from './lib/demoProfiles';
 import './styles/SecureVote.css';
 
 function BallotGuard({ ballotId, navigate }) {
@@ -39,10 +40,36 @@ function BallotGuard({ ballotId, navigate }) {
 
 export default function App() {
   const [route, setRoute] = useState(window.location.pathname || '/');
+  const [isAuthenticated, setIsAuthenticated] = useState(() => isUserAuthenticated());
   const [isCandidateAgent, setIsCandidateAgent] = useState(false);
   const [checkingRole, setCheckingRole] = useState(true);
   const [currentView, setCurrentView] = useState('student');  // 'student' or 'ec-admin'
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
+
+  useEffect(() => {
+    const handleAuthChange = (e) => {
+      setIsAuthenticated(Boolean(e.detail?.authenticated));
+    };
+    window.addEventListener('knust_auth_state_changed', handleAuthChange);
+    return () => window.removeEventListener('knust_auth_state_changed', handleAuthChange);
+  }, []);
+
+  const handleLoginSuccess = (user) => {
+    setIsAuthenticated(true);
+    if (user?.isEcOfficer) {
+      setCurrentView('ec-admin');
+      navigate('/ec-admin');
+    } else {
+      setCurrentView('student');
+      navigate('/');
+    }
+  };
+
+  const handleSignOut = () => {
+    signOutUser();
+    setIsAuthenticated(false);
+    navigate('/login');
+  };
 
   // Use EC authorization hook for dual-identity detection
   const { hasECAccess, ecRole, ecJurisdictionName, checkVoteStatus, voteStatus, currentElectionId } = useECAuthorization();
@@ -173,6 +200,21 @@ export default function App() {
     );
   }
 
+  // If not logged in or explicitly navigating to /login, render the KNUST Login Gateway
+  if (!isAuthenticated || route === '/login') {
+    return (
+      <AdminAuthProvider>
+        <div className="min-h-screen bg-[#F5F7F8] dark:bg-slate-900 text-[#202522] dark:text-slate-100 transition-colors duration-200 relative">
+          <div className="fixed top-4 right-5 z-50">
+            <ThemeToggle />
+          </div>
+          <ToastContainer />
+          <KNUSTLogin onLoginSuccess={handleLoginSuccess} navigate={navigate} />
+        </div>
+      </AdminAuthProvider>
+    );
+  }
+
   return (
     <AdminAuthProvider>
       <div className="app-root flex flex-col md:flex-row h-screen overflow-hidden bg-[#F5F7F8] dark:bg-slate-900 text-[#202522] dark:text-slate-100 transition-colors duration-200 relative">
@@ -202,6 +244,7 @@ export default function App() {
           onViewChange={handleViewChange}
           isMobileDrawerOpen={isMobileDrawerOpen}
           onCloseMobileDrawer={() => setIsMobileDrawerOpen(false)}
+          onSignOut={handleSignOut}
         />
 
         {/* Main Content Area */}

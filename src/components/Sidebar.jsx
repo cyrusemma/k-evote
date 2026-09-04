@@ -32,7 +32,8 @@ export default function Sidebar({
   onViewChange,
   onNavigate,
   isMobileDrawerOpen = false,
-  onCloseMobileDrawer
+  onCloseMobileDrawer,
+  onSignOut
 }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [activeRoute, setActiveRoute] = useState(() => window.location.pathname || '/');
@@ -496,12 +497,16 @@ export default function Sidebar({
               isCollapsed && !isMobileDrawerOpen ? 'justify-center p-2' : 'justify-start gap-3 px-3 py-2'
             }`}
             onClick={() => {
-              showToast('You have been logged out (Demo session reset)', 'info');
+              if (typeof onSignOut === 'function') {
+                onSignOut();
+              } else {
+                showToast('You have been logged out (Session reset)', 'info');
+              }
             }}
-            title={isCollapsed && !isMobileDrawerOpen ? "Logout" : undefined}
+            title={isCollapsed && !isMobileDrawerOpen ? "Sign Out" : undefined}
           >
             <LogOut className="w-4 h-4 flex-shrink-0 text-slate-400 group-hover:text-[#075C42] dark:group-hover:text-emerald-400 transition-colors" />
-            {(!isCollapsed || isMobileDrawerOpen) && <span>Logout</span>}
+            {(!isCollapsed || isMobileDrawerOpen) && <span>Sign Out</span>}
           </button>
         </div>
       </aside>
