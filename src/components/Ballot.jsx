@@ -316,14 +316,14 @@ function getDefaultCandidates(electionId, activeStudent) {
         candidate_id: 'mp-cand-1',
         full_name: `Hon. Kwame Appiah (${userConstituency} MP)`,
         position: 'Member of Parliament (MP)',
-        photo_url: '',
+        photo_url: '/candidates/kwame_appiah.jpg',
         manifesto_summary: `Pledging to enhance hostel security, street lighting along ${userConstituency} corridor, and dedicated transit shuttles.`
       },
       {
         candidate_id: 'mp-cand-2',
         full_name: `Hon. Portia Osei (${userConstituency} MP)`,
         position: 'Member of Parliament (MP)',
-        photo_url: '',
+        photo_url: '/candidates/portia_osei.jpg',
         manifesto_summary: `Focusing on hostel rent regulation, reliable water supply, and late-night library study shuttles for ${userConstituency} students.`
       }
     ];
@@ -335,35 +335,35 @@ function getDefaultCandidates(electionId, activeStudent) {
         candidate_id: 'dept-pres-1',
         full_name: 'Kwabena Darko',
         position: 'President',
-        photo_url: '',
+        photo_url: '/candidates/kwabena_darko.jpg',
         manifesto_summary: 'Upgrading departmental hardware and computer labs, organizing quarterly tech hackathons, and sponsoring student developer licenses.'
       },
       {
         candidate_id: 'dept-pres-2',
         full_name: 'Eunice Boateng',
         position: 'President',
-        photo_url: '',
+        photo_url: '/candidates/eunice_boateng.jpg',
         manifesto_summary: 'Securing industrial internship partnerships, establishing engineering alumni mentorship, and ensuring 24/7 access to design studios.'
       },
       {
         candidate_id: 'dept-wocom-1',
         full_name: 'Yaa Serwaa Bonsu',
         position: 'Women\'s Commissioner (WOCOM)',
-        photo_url: '',
+        photo_url: '/candidates/serwaa_akoto.jpg',
         manifesto_summary: 'Establishing STEM mentorship for female engineers, providing emergency healthcare support, and organizing leadership workshops.'
       },
       {
         candidate_id: 'dept-sec-1',
         full_name: 'Francis Mensah',
         position: 'General Secretary',
-        photo_url: '',
+        photo_url: '/candidates/francis_mensah.jpg',
         manifesto_summary: 'Automating academic material distribution, maintaining updated course drive repositories, and issuing prompt executive bulletins.'
       },
       {
         candidate_id: 'dept-treas-1',
         full_name: 'Sandra Owusu',
         position: 'Financial Secretary',
-        photo_url: '',
+        photo_url: '/candidates/sandra_ampofo.jpg',
         manifesto_summary: 'Publishing audited departmental financial statements quarterly, streamlining dues collection, and funding project grants.'
       }
     ];
@@ -374,35 +374,35 @@ function getDefaultCandidates(electionId, activeStudent) {
       candidate_id: 'pres-1',
       full_name: 'Emmanuel Ampofo',
       position: 'President',
-      photo_url: '',
+      photo_url: '/candidates/emmanuel_ampofo.jpg',
       manifesto_summary: 'Pioneering campus-wide solar Wi-Fi hubs, expanding hostel shuttle routes, and establishing an emergency student welfare grant.'
     },
     {
       candidate_id: 'pres-2',
       full_name: 'Abena Koduah',
       position: 'President',
-      photo_url: '',
+      photo_url: '/candidates/abena_koduah.jpg',
       manifesto_summary: 'Negotiating hostel rent caps, digitizing academic complaint resolution, and modernizing campus sports complex facilities.'
     },
     {
       candidate_id: 'wocom-1',
       full_name: 'Priscilla Addo',
       position: 'Women\'s Commissioner (WOCOM)',
-      photo_url: '',
+      photo_url: '/candidates/priscilla_addo.jpg',
       manifesto_summary: 'Launching female student entrepreneurship grants, expanding reproductive health resources, and hosting leadership summits.'
     },
     {
       candidate_id: 'fin-1',
       full_name: 'Sandra Ampofo',
       position: 'Financial Secretary',
-      photo_url: '',
+      photo_url: '/candidates/sandra_ampofo.jpg',
       manifesto_summary: 'Audited open-book financial records, digital SRC fund tracking, and emergency student loan grants.'
     },
     {
       candidate_id: 'sec-1',
       full_name: 'Akua Mansa Sarfo',
       position: 'General Secretary',
-      photo_url: '',
+      photo_url: '/candidates/akua_mansa_sarfo.jpg',
       manifesto_summary: 'Prompt publication of SRC executive minutes, digital complaint ticketing, and official press releases.'
     }
   ];
