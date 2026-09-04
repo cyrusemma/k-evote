@@ -16,6 +16,7 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
+  Radio,
   X
 } from 'lucide-react';
 import AppBarRoleSwitcher from './AppBarRoleSwitcher';
@@ -101,6 +102,7 @@ export default function Sidebar({
     if (path === '/ec-admin') return activeRoute === '/ec-admin';
     if (path === '/candidate-agent') return activeRoute.startsWith('/candidate-agent');
     if (path === '/results') return activeRoute === '/results' || activeRoute === '/public-results';
+    if (path === '/election-night') return activeRoute === '/election-night' || activeRoute === '/turnout';
     return activeRoute === path;
   };
 
@@ -252,6 +254,20 @@ export default function Sidebar({
                 <span className="text-[10px] font-semibold leading-tight truncate w-full">Results</span>
               </a>
 
+              {/* Election Night Live Hub */}
+              <a
+                href="#election-night"
+                onClick={e => go(e, '/election-night')}
+                className={getItemClassMini('/election-night')}
+                title="Election Night Hub"
+              >
+                <div className="relative">
+                  <Radio className="w-5 h-5 flex-shrink-0 text-rose-500 animate-pulse" />
+                  <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-rose-500 animate-ping" />
+                </div>
+                <span className="text-[10px] font-bold text-rose-600 dark:text-rose-400 leading-tight truncate w-full">Live Hub</span>
+              </a>
+
               {/* EC Admin (only when authorized) */}
               {(hasECAccess || currentView === 'ec-admin') && (
                 <a
@@ -381,6 +397,25 @@ export default function Sidebar({
                 >
                   <Eye className="w-4 h-4 flex-shrink-0 text-slate-500 dark:text-slate-400" />
                   <span>Observer Room</span>
+                </a>
+              </li>
+
+              {/* Election Night Hub */}
+              <li className="sidebar-subitem">
+                <a
+                  href="#election-night"
+                  onClick={e => go(e, '/election-night')}
+                  className={
+                    isCurrentRoute('/election-night')
+                      ? "bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400 font-bold border-l-4 border-rose-600 rounded-r-xl transition-colors shadow-2xs px-3 py-2.5 min-h-[42px] flex items-center gap-3 text-sm"
+                      : "text-slate-700 dark:text-slate-200 hover:text-rose-600 hover:bg-rose-50/50 dark:hover:text-white dark:hover:bg-slate-800/80 font-medium text-sm rounded-xl transition-colors px-3 py-2.5 min-h-[42px] flex items-center gap-3"
+                  }
+                >
+                  <Radio className="w-4 h-4 flex-shrink-0 text-rose-500 animate-pulse" />
+                  <span>Election Night Hub</span>
+                  <span className="ml-auto bg-rose-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded tracking-wider animate-pulse">
+                    LIVE
+                  </span>
                 </a>
               </li>
 

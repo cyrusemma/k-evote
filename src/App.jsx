@@ -8,6 +8,7 @@ import ECAdmin from './components/ECAdmin';
 import ECAdminAuthGuard from './components/ECAdminAuthGuard';
 import StudentResultsPortal from './components/StudentResultsPortal';
 import CandidateAgentRoom from './components/CandidateAgentRoom';
+import ElectionNightCenter from './components/ElectionNightCenter';
 import Unauthorized from './components/Unauthorized';
 import AppBarRoleSwitcher from './components/AppBarRoleSwitcher';
 import ThemeToggle from './components/ThemeToggle';
@@ -261,6 +262,8 @@ export default function App() {
             <Unauthorized onBack={() => navigate('/')} />
           ) : route === '/results' || route === '/public-results' ? (
             <StudentResultsPortal onBack={() => navigate('/')} />
+          ) : route === '/election-night' || route === '/turnout' ? (
+            <ElectionNightCenter navigate={navigate} />
           ) : (
             <Dashboard navigate={navigate} />
           )}

@@ -20,7 +20,10 @@ import {
   X,
   RefreshCw,
   Building,
-  Home
+  Home,
+  Radio,
+  Scale,
+  Sparkles
 } from 'lucide-react';
 import VirtualQueue from './VirtualQueue';
 import useStudentSession from '../hooks/useStudentSession';
@@ -28,6 +31,7 @@ import { supabase } from '../lib/supabaseClient';
 import ConstituencyModal from './ConstituencyModal';
 import StepUpAuthModal from './StepUpAuthModal';
 import DemoProfileSwitcher from './DemoProfileSwitcher';
+import CandidateComparisonModal from './CandidateComparisonModal';
 import {
   checkElectionEligibility,
   deriveYearOfStudy,
@@ -172,6 +176,7 @@ export default function SecureVoteModule({ navigate }) {
 
   const [isBiometricsModalOpen, setIsBiometricsModalOpen] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
+  const [isDossierOpen, setIsDossierOpen] = useState(false);
 
   const handleVerifyBiometrics = async () => {
     // Check if device supports physical biometrics (WebAuthn Platform Authenticator)
@@ -724,6 +729,63 @@ export default function SecureVoteModule({ navigate }) {
           });
         }}
       />
+
+      {/* ── High-Impact Electoral Utilities: Election Night Hub & Candidate Dossier ── */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        {/* Card 1: Election Night Live Command Center */}
+        <div className="rounded-2xl bg-gradient-to-br from-slate-900 via-[#062c1e] to-slate-900 text-white p-5 border border-emerald-500/30 shadow-md flex flex-col justify-between relative overflow-hidden">
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-3">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/30 animate-pulse">
+                <Radio size={12} className="text-rose-400" />
+                Live Command Center
+              </span>
+              <span className="text-[10px] font-mono text-emerald-400 font-bold">68,400 VOTERS</span>
+            </div>
+            <h3 className="text-base font-extrabold text-white m-0 tracking-tight">
+              Election Night Turnout &amp; Constituency Hub
+            </h3>
+            <p className="text-xs text-slate-300 mt-1.5 mb-4 leading-relaxed">
+              Track live voter throughput across Ayeduase, Gaza/Kotei, campus residential halls, and peak voting velocity curves.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => navigate('/election-night')}
+            className="relative z-10 w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold uppercase tracking-wider transition-all cursor-pointer border-none flex items-center justify-center gap-2 shadow-sm"
+          >
+            <span>Launch Live Command Center</span>
+            <ChevronRight size={14} />
+          </button>
+        </div>
+
+        {/* Card 2: Candidate Policy Manifestos & EC Vetting Dossier */}
+        <div className="rounded-2xl bg-gradient-to-br from-slate-900 via-slate-850 to-slate-900 text-white p-5 border border-[#D4AF37]/30 shadow-md flex flex-col justify-between relative overflow-hidden">
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-3">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                <Scale size={12} className="text-[#D4AF37]" />
+                Informed Democracy
+              </span>
+              <span className="text-[10px] font-mono text-[#D4AF37] font-bold">EC VETTED</span>
+            </div>
+            <h3 className="text-base font-extrabold text-white m-0 tracking-tight">
+              Candidate Policy &amp; Vetting Dossier
+            </h3>
+            <p className="text-xs text-slate-300 mt-1.5 mb-4 leading-relaxed">
+              Compare candidate manifestos side-by-side on Wi-Fi, hostel rents, and shuttle fleets alongside statutory CWA clearance.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsDossierOpen(true)}
+            className="relative z-10 w-full py-2.5 px-4 rounded-xl bg-[#007A4D] hover:bg-[#075C42] text-white text-xs font-extrabold uppercase tracking-wider transition-all cursor-pointer border-none flex items-center justify-center gap-2 shadow-sm"
+          >
+            <span>Compare Manifestos &amp; Vetting</span>
+            <ChevronRight size={14} />
+          </button>
+        </div>
+      </div>
 
       {/* ── 3. Modernized Election Cards & Buttons ── */}
       <div className="mb-4">
@@ -1377,6 +1439,13 @@ export default function SecureVoteModule({ navigate }) {
           </div>
         </div>
       )}
+
+      {/* Candidate Side-by-Side Comparison & Vetting Dossier Modal */}
+      <CandidateComparisonModal
+        isOpen={isDossierOpen}
+        onClose={() => setIsDossierOpen(false)}
+        position="President"
+      />
     </div>
   );
 }

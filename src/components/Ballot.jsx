@@ -22,12 +22,14 @@ import {
   AlertTriangle,
   Download,
   Scroll,
-  Clock
+  Clock,
+  Scale
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { submitAnonymousVote } from '../lib/votingService';
 import { useAdminAuth } from '../context/AdminAuthContext';
 import { mockElections } from '../lib/eligibility';
+import CandidateComparisonModal from './CandidateComparisonModal';
 import '../styles/SecureVote.css';
 
 // Tactile Haptic Feedback Helper (HCI standard)
@@ -512,6 +514,13 @@ export default function Ballot({ electionId, student, onBack }) {
   const [voteReceipt, setVoteReceipt] = useState(null);
   const [timeLeft, setTimeLeft] = useState(null);
 
+  // Candidate Comparison Modal State
+  const [compareModalState, setCompareModalState] = useState({
+    isOpen: false,
+    position: 'President',
+    candidates: []
+  });
+
   useEffect(() => {
     const targetMock = mockElections.find(e => e.id === electionId) || mockElections[0];
     const endTime = targetMock.endTime ? new Date(targetMock.endTime).getTime() : Date.now() + 2 * 3600 * 1000;
@@ -918,18 +927,35 @@ export default function Ballot({ electionId, student, onBack }) {
                     )}
                   </div>
 
-                  {/* Status Pill */}
-                  {hasSelection ? (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-[#007A4D] dark:text-emerald-400 text-xs font-bold border border-emerald-200 dark:border-emerald-800 whitespace-nowrap shadow-xs animate-fadeIn">
-                      <CheckCircle2 size={12} />
-                      <span>{typeof selections[position] === 'object' ? `Voted ${selections[position]?.choice}` : 'Selected'}</span>
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 text-xs font-bold border border-rose-200 dark:border-rose-800 whitespace-nowrap shadow-xs">
-                      <AlertTriangle size={12} />
-                      <span>Required</span>
-                    </span>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {/* Policy Comparison & Vetting Dossier Button */}
+                    <button
+                      type="button"
+                      onClick={() => setCompareModalState({
+                        isOpen: true,
+                        position,
+                        candidates: candidateList
+                      })}
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold text-[#007A4D] dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 border border-emerald-200 dark:border-emerald-800/80 transition-all cursor-pointer shadow-2xs"
+                      title="Compare candidate manifestos, policy matrix and EC vetting clearance"
+                    >
+                      <Scale size={13} />
+                      <span>{candidateList.length > 1 ? 'Compare Candidates' : 'Policy & Vetting'}</span>
+                    </button>
+
+                    {/* Status Pill */}
+                    {hasSelection ? (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-[#007A4D] dark:text-emerald-400 text-xs font-bold border border-emerald-200 dark:border-emerald-800 whitespace-nowrap shadow-xs animate-fadeIn">
+                        <CheckCircle2 size={12} />
+                        <span>{typeof selections[position] === 'object' ? `Voted ${selections[position]?.choice}` : 'Selected'}</span>
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 text-xs font-bold border border-rose-200 dark:border-rose-800 whitespace-nowrap shadow-xs">
+                        <AlertTriangle size={12} />
+                        <span>Required</span>
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 {/* ── Responsive Candidate Card Grid ── */}
@@ -1202,6 +1228,26 @@ export default function Ballot({ electionId, student, onBack }) {
           </div>
         </div>
       )}
+
+      {/* ── Candidate Side-by-Side Comparison & Vetting Dossier Modal ── */}
+      <CandidateComparisonModal
+        isOpen={compareModalState.isOpen}
+        onClose={() => setCompareModalState(prev => ({ ...prev, isOpen: false }))}
+        position={compareModalState.position}
+        candidates={compareModalState.candidates}
+        selectedCandidateId={
+          typeof selections[compareModalState.position] === 'object'
+            ? selections[compareModalState.position]?.candidate_id
+            : selections[compareModalState.position]
+        }
+        onSelectCandidate={(pos, candId) => {
+          if (compareModalState.candidates.length === 1) {
+            handleReferendumVote(pos, candId, 'YES');
+          } else {
+            handleSelectCandidate(pos, candId);
+          }
+        }}
+      />
 
     </div>
   );
