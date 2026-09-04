@@ -325,6 +325,13 @@ function getDefaultCandidates(electionId, activeStudent) {
         position: 'Member of Parliament (MP)',
         photo_url: '/candidates/portia_osei.jpg',
         manifesto_summary: `Focusing on hostel rent regulation, reliable water supply, and late-night library study shuttles for ${userConstituency} students.`
+      },
+      {
+        candidate_id: 'mp-cand-3',
+        full_name: `Hon. Emmanuel Boakye (${userConstituency})`,
+        position: 'Constituency Youth Organizer',
+        photo_url: '/candidates/emmanuel_ampofo.jpg',
+        manifesto_summary: `Organizing off-campus security neighborhood watch forums, emergency welfare response, and community study hubs.`
       }
     ];
   }
@@ -346,13 +353,6 @@ function getDefaultCandidates(electionId, activeStudent) {
         manifesto_summary: 'Securing industrial internship partnerships, establishing engineering alumni mentorship, and ensuring 24/7 access to design studios.'
       },
       {
-        candidate_id: 'dept-wocom-1',
-        full_name: 'Yaa Serwaa Bonsu',
-        position: 'Women\'s Commissioner (WOCOM)',
-        photo_url: '/candidates/serwaa_akoto.jpg',
-        manifesto_summary: 'Establishing STEM mentorship for female engineers, providing emergency healthcare support, and organizing leadership workshops.'
-      },
-      {
         candidate_id: 'dept-sec-1',
         full_name: 'Francis Mensah',
         position: 'General Secretary',
@@ -365,6 +365,27 @@ function getDefaultCandidates(electionId, activeStudent) {
         position: 'Financial Secretary',
         photo_url: '/candidates/sandra_ampofo.jpg',
         manifesto_summary: 'Publishing audited departmental financial statements quarterly, streamlining dues collection, and funding project grants.'
+      },
+      {
+        candidate_id: 'dept-wocom-1',
+        full_name: 'Yaa Serwaa Bonsu',
+        position: 'Women\'s Commissioner (WOCOM)',
+        photo_url: '/candidates/serwaa_akoto.jpg',
+        manifesto_summary: 'Establishing STEM mentorship for female engineers, providing emergency healthcare support, and organizing leadership workshops.'
+      },
+      {
+        candidate_id: 'dept-wocom-2',
+        full_name: 'Priscilla Addo',
+        position: 'Women\'s Commissioner (WOCOM)',
+        photo_url: '/candidates/priscilla_addo.jpg',
+        manifesto_summary: 'Facilitating female engineering bursaries, personal security workshops, and tech networking forums.'
+      },
+      {
+        candidate_id: 'dept-org-1',
+        full_name: 'Kofi Mensah',
+        position: 'Organizing Secretary',
+        photo_url: '/candidates/kofi_mensah.jpg',
+        manifesto_summary: 'Planning high-impact college career fairs, technology exhibitions, and departmental sports galas.'
       }
     ];
   }
@@ -385,11 +406,32 @@ function getDefaultCandidates(electionId, activeStudent) {
       manifesto_summary: 'Negotiating hostel rent caps, digitizing academic complaint resolution, and modernizing campus sports complex facilities.'
     },
     {
-      candidate_id: 'wocom-1',
-      full_name: 'Priscilla Addo',
-      position: 'Women\'s Commissioner (WOCOM)',
-      photo_url: '/candidates/priscilla_addo.jpg',
-      manifesto_summary: 'Launching female student entrepreneurship grants, expanding reproductive health resources, and hosting leadership summits.'
+      candidate_id: 'pres-3',
+      full_name: 'Kofi Mensah',
+      position: 'President',
+      photo_url: '/candidates/kofi_mensah.jpg',
+      manifesto_summary: 'Revamping campus security lighting along off-campus routes, student legal aid clinics, and 24-hour study spaces.'
+    },
+    {
+      candidate_id: 'vp-1',
+      full_name: 'Francis Mensah',
+      position: 'Vice President',
+      photo_url: '/candidates/francis_mensah.jpg',
+      manifesto_summary: 'Coordinating academic board resolutions, promoting inter-hall debate leagues, and standardizing student grievance channels.'
+    },
+    {
+      candidate_id: 'vp-2',
+      full_name: 'Eunice Boateng',
+      position: 'Vice President',
+      photo_url: '/candidates/eunice_boateng.jpg',
+      manifesto_summary: 'Fostering university-industry career links, mental health counseling support networks, and transparent committee operations.'
+    },
+    {
+      candidate_id: 'sec-1',
+      full_name: 'Akua Mansa Sarfo',
+      position: 'General Secretary',
+      photo_url: '/candidates/akua_mansa_sarfo.jpg',
+      manifesto_summary: 'Prompt publication of SRC executive minutes, digital complaint ticketing, and official press releases.'
     },
     {
       candidate_id: 'fin-1',
@@ -399,11 +441,25 @@ function getDefaultCandidates(electionId, activeStudent) {
       manifesto_summary: 'Audited open-book financial records, digital SRC fund tracking, and emergency student loan grants.'
     },
     {
-      candidate_id: 'sec-1',
-      full_name: 'Akua Mansa Sarfo',
-      position: 'General Secretary',
-      photo_url: '/candidates/akua_mansa_sarfo.jpg',
-      manifesto_summary: 'Prompt publication of SRC executive minutes, digital complaint ticketing, and official press releases.'
+      candidate_id: 'wocom-1',
+      full_name: 'Priscilla Addo',
+      position: 'Women\'s Commissioner (WOCOM)',
+      photo_url: '/candidates/priscilla_addo.jpg',
+      manifesto_summary: 'Launching female student entrepreneurship grants, expanding reproductive health resources, and hosting leadership summits.'
+    },
+    {
+      candidate_id: 'wocom-2',
+      full_name: 'Yaa Serwaa Bonsu',
+      position: 'Women\'s Commissioner (WOCOM)',
+      photo_url: '/candidates/serwaa_akoto.jpg',
+      manifesto_summary: 'Mentorship pipelines for women in academia, hygiene kit distribution drives, and annual female achievers summits.'
+    },
+    {
+      candidate_id: 'org-1',
+      full_name: 'Kwabena Darko',
+      position: 'Organizing Secretary',
+      photo_url: '/candidates/kwabena_darko.jpg',
+      manifesto_summary: 'Re-energizing the KNUST SRC Mega Fair, campus-wide inter-hall sports festivals, and subsidized inter-city transit for holiday breaks.'
     }
   ];
 }
@@ -537,6 +593,14 @@ export default function Ballot({ electionId, student, onBack }) {
     setSelections(prev => ({ ...prev, [position]: candidateId }));
   }
 
+  function handleReferendumVote(position, candidateId, choice) {
+    triggerHaptic([20]);
+    setSelections(prev => ({
+      ...prev,
+      [position]: { candidate_id: candidateId, choice }
+    }));
+  }
+
   async function handleSubmitBallot() {
     if (!isComplete) {
       alert('Please make a selection for every position before submitting.');
@@ -553,7 +617,12 @@ export default function Ballot({ electionId, student, onBack }) {
       const payloadString = JSON.stringify({ receiptId, studentId: currentStudentId, electionId, selections, timestamp });
       const sha256Hash = await generateSHA256Hash(payloadString);
 
-      const votesPayload = Object.entries(selections).map(([pos, candId]) => ({ candidate_id: candId, position: pos }));
+      const votesPayload = Object.entries(selections).map(([pos, val]) => {
+        if (typeof val === 'object' && val?.choice) {
+          return { candidate_id: val.candidate_id, position: pos, choice: val.choice };
+        }
+        return { candidate_id: val, position: pos, choice: 'SELECTED' };
+      });
 
       // Submit via voting service (includes automatic offline/localStorage fallback)
       try {
@@ -588,9 +657,17 @@ export default function Ballot({ electionId, student, onBack }) {
         sha256Hash,
         electionTitle,
         studentId: currentStudentId,
-        selectionsSummary: Object.entries(selections).map(([pos, candId]) => {
-          const candObj = candidates.find(c => c.candidate_id === candId);
-          return { position: pos, candidateName: candObj ? candObj.full_name : candId };
+        selectionsSummary: Object.entries(selections).map(([pos, val]) => {
+          if (typeof val === 'object' && val?.choice) {
+            const candObj = candidates.find(c => c.candidate_id === val.candidate_id);
+            return {
+              position: pos,
+              candidateName: `${candObj ? candObj.full_name : 'Candidate'} — ${val.choice} Vote`,
+              choice: val.choice
+            };
+          }
+          const candObj = candidates.find(c => c.candidate_id === val);
+          return { position: pos, candidateName: candObj ? candObj.full_name : val };
         })
       };
 
@@ -827,18 +904,25 @@ export default function Ballot({ electionId, student, onBack }) {
 
                 {/* ── Sticky Section Header ── */}
                 <div className="sticky top-0 z-10 bg-[#F3F6F8]/95 dark:bg-slate-900/95 backdrop-blur-sm flex items-center justify-between gap-3 border-b border-gray-200 dark:border-slate-800 pb-2.5 mb-4 pt-2">
-                  <h2
-                    id={`section-${position}`}
-                    className="m-0 text-sm sm:text-base md:text-lg font-extrabold text-gray-900 dark:text-slate-100 tracking-tight uppercase"
-                  >
-                    {position}
-                  </h2>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h2
+                      id={`section-${position}`}
+                      className="m-0 text-sm sm:text-base md:text-lg font-extrabold text-gray-900 dark:text-slate-100 tracking-tight uppercase"
+                    >
+                      {position}
+                    </h2>
+                    {candidateList.length === 1 && (
+                      <span className="bg-amber-100 text-amber-900 dark:bg-amber-950/70 dark:text-amber-300 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-amber-300 dark:border-amber-700">
+                        Unopposed • YES / NO Referendum
+                      </span>
+                    )}
+                  </div>
 
                   {/* Status Pill */}
                   {hasSelection ? (
                     <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-[#007A4D] dark:text-emerald-400 text-xs font-bold border border-emerald-200 dark:border-emerald-800 whitespace-nowrap shadow-xs animate-fadeIn">
                       <CheckCircle2 size={12} />
-                      <span>Selected</span>
+                      <span>{typeof selections[position] === 'object' ? `Voted ${selections[position]?.choice}` : 'Selected'}</span>
                     </span>
                   ) : (
                     <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 text-xs font-bold border border-rose-200 dark:border-rose-800 whitespace-nowrap shadow-xs">
@@ -851,18 +935,33 @@ export default function Ballot({ electionId, student, onBack }) {
                 {/* ── Responsive Candidate Card Grid ── */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                   {candidateList.map(c => {
-                    const isChecked = selections[position] === c.candidate_id;
+                    const isUnopposed = candidateList.length === 1;
+                    const sel = selections[position];
+                    const isContestedSelected = sel === c.candidate_id;
+                    const isYesSelected = typeof sel === 'object' && sel?.candidate_id === c.candidate_id && sel?.choice === 'YES';
+                    const isNoSelected = typeof sel === 'object' && sel?.candidate_id === c.candidate_id && sel?.choice === 'NO';
+                    const isCardSelected = isContestedSelected || isYesSelected || isNoSelected;
 
                     return (
                       <div
                         key={c.candidate_id}
                         className={[
                           'ballot-candidate-card-new',
-                          isChecked ? 'selected' : '',
+                          isCardSelected ? 'selected' : '',
                           'flex flex-col justify-between gap-4 p-4 sm:p-5 rounded-2xl transition-all'
                         ].join(' ')}
-                        onClick={() => handleSelectCandidate(position, c.candidate_id)}
                       >
+                        {/* ── Top: Referendum Pill for Unopposed ── */}
+                        {isUnopposed && (
+                          <div className="flex items-center justify-between pb-1 border-b border-amber-100 dark:border-amber-900/40">
+                            <span className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 px-2.5 py-0.5 rounded-md border border-amber-300 dark:border-amber-700">
+                              <span>Unopposed Candidate</span>
+                              <span className="text-slate-400">•</span>
+                              <span>Confirmation Referendum</span>
+                            </span>
+                          </div>
+                        )}
+
                         {/* ── Top: Avatar + Candidate Details ── */}
                         <div className="flex items-start gap-3.5 sm:gap-4">
                           <ClickableCandidateAvatar
@@ -893,29 +992,63 @@ export default function Ballot({ electionId, student, onBack }) {
                           </div>
                         </div>
 
-                        {/* ── Bottom: Vote Selection Action Button ── */}
-                        <button
-                          type="button"
-                          className={[
-                            'w-full py-3 rounded-xl font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 text-xs tracking-wider border-0 uppercase min-h-[44px] touch-active',
-                            isChecked
-                              ? 'bg-[#007A4D] text-white hover:bg-[#075C42] shadow-2xs font-extrabold'
-                              : 'bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-650 text-slate-800 dark:text-slate-200',
-                          ].join(' ')}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleSelectCandidate(position, c.candidate_id);
-                          }}
-                        >
-                          {isChecked ? (
-                            <span className="flex items-center gap-1">
-                              <CheckCircle2 size={14} />
-                              <span>Selected Candidate</span>
-                            </span>
-                          ) : (
-                            <span>Select Candidate</span>
-                          )}
-                        </button>
+                        {/* ── Bottom: Vote Selection Action ── */}
+                        {isUnopposed ? (
+                          <div className="flex flex-col gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                            <p className="text-[11px] text-slate-600 dark:text-slate-400 font-semibold m-0 text-center">
+                              Do you confirm <strong>{c.full_name}</strong> for {position}?
+                            </p>
+                            <div className="grid grid-cols-2 gap-2.5">
+                              <button
+                                type="button"
+                                className={[
+                                  'py-2.5 px-3 rounded-xl font-extrabold text-xs uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1.5 min-h-[44px] touch-active border',
+                                  isYesSelected
+                                    ? 'bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-700 shadow-md ring-2 ring-emerald-400/40'
+                                    : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-950/40 dark:hover:bg-emerald-950/70 dark:text-emerald-300 dark:border-emerald-800/70'
+                                ].join(' ')}
+                                onClick={() => handleReferendumVote(position, c.candidate_id, 'YES')}
+                              >
+                                <CheckCircle2 size={16} />
+                                <span>{isYesSelected ? 'VOTED YES' : 'VOTE YES'}</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                className={[
+                                  'py-2.5 px-3 rounded-xl font-extrabold text-xs uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1.5 min-h-[44px] touch-active border',
+                                  isNoSelected
+                                    ? 'bg-rose-600 hover:bg-rose-700 text-white border-rose-700 shadow-md ring-2 ring-rose-400/40'
+                                    : 'bg-rose-50 hover:bg-rose-100 text-rose-800 border-rose-200 dark:bg-rose-950/40 dark:hover:bg-rose-950/70 dark:text-rose-300 dark:border-rose-800/70'
+                                ].join(' ')}
+                                onClick={() => handleReferendumVote(position, c.candidate_id, 'NO')}
+                              >
+                                <X size={16} />
+                                <span>{isNoSelected ? 'VOTED NO' : 'VOTE NO'}</span>
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            className={[
+                              'w-full py-3 rounded-xl font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 text-xs tracking-wider border-0 uppercase min-h-[44px] touch-active',
+                              isContestedSelected
+                                ? 'bg-[#007A4D] text-white hover:bg-[#075C42] shadow-2xs font-extrabold'
+                                : 'bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-650 text-slate-800 dark:text-slate-200',
+                            ].join(' ')}
+                            onClick={() => handleSelectCandidate(position, c.candidate_id)}
+                          >
+                            {isContestedSelected ? (
+                              <span className="flex items-center gap-1">
+                                <CheckCircle2 size={14} />
+                                <span>Selected Candidate</span>
+                              </span>
+                            ) : (
+                              <span>Select Candidate</span>
+                            )}
+                          </button>
+                        )}
                       </div>
                     );
                   })}
@@ -1002,10 +1135,30 @@ export default function Ballot({ electionId, student, onBack }) {
               </span>
               <div className="bg-slate-50 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 rounded-2xl p-3 flex flex-col gap-2.5 max-h-56 overflow-y-auto">
                 {positionsList.map(pos => {
-                  const selectedId = selections[pos];
-                  const candObj = candidates.find(c => c.candidate_id === selectedId);
+                  const sel = selections[pos];
+                  let candObj = null;
+                  let choiceBadge = null;
+
+                  if (typeof sel === 'object' && sel?.choice) {
+                    candObj = candidates.find(c => c.candidate_id === sel.candidate_id);
+                    choiceBadge = (
+                      <span className={`text-[10px] font-black uppercase px-2.5 py-1 rounded-lg border ${
+                        sel.choice === 'YES'
+                          ? 'bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-950/80 dark:text-emerald-300 dark:border-emerald-700'
+                          : 'bg-rose-100 text-rose-800 border-rose-300 dark:bg-rose-950/80 dark:text-rose-300 dark:border-rose-700'
+                      }`}>
+                        Voted {sel.choice}
+                      </span>
+                    );
+                  } else {
+                    candObj = candidates.find(c => c.candidate_id === sel);
+                    choiceBadge = (
+                      <CheckCircle2 size={16} className="text-[#007A4D] dark:text-emerald-400 shrink-0" />
+                    );
+                  }
+
                   return (
-                    <div key={pos} className="flex items-center gap-3 p-2 rounded-xl bg-white dark:bg-slate-900/80 border border-slate-200/60 dark:border-slate-700/60 shadow-2xs">
+                    <div key={pos} className="flex items-center gap-3 p-2.5 rounded-xl bg-white dark:bg-slate-900/80 border border-slate-200/60 dark:border-slate-700/60 shadow-2xs">
                       <CandidateAvatar src={candObj?.photo_url} name={candObj?.full_name} sizeClass="w-9 h-9" textSizeClass="text-xs" />
                       <div className="flex flex-col min-w-0 flex-1">
                         <span className="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase leading-none">{pos}</span>
@@ -1013,7 +1166,7 @@ export default function Ballot({ electionId, student, onBack }) {
                           {candObj ? candObj.full_name : 'Selected'}
                         </span>
                       </div>
-                      <CheckCircle2 size={16} className="text-[#007A4D] dark:text-emerald-400 shrink-0" />
+                      {choiceBadge}
                     </div>
                   );
                 })}
