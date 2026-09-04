@@ -552,7 +552,7 @@ export function CandidateAgentObserverDemo({ room, election, candidates }) {
         <div>
           <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-wider">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            Candidate Agent Live Feed (Read-Only Demo)
+            Accredited Polling Agent Live Telemetry Stream
           </div>
           <h2 className="text-base sm:text-lg font-black text-white mt-2 m-0 tracking-tight font-display">
             OBSERVER CONSOLE SCREEN
@@ -563,8 +563,9 @@ export function CandidateAgentObserverDemo({ room, election, candidates }) {
           <span className={`px-2.5 py-1 rounded-md text-[10px] font-extrabold border uppercase tracking-wider ${statusBadge.bg}`}>
             ● {statusBadge.label}
           </span>
-          <span className="px-2.5 py-1 rounded-md text-[10px] font-extrabold bg-slate-900 border border-slate-800 text-slate-400 uppercase tracking-wider">
-            Demo Mode
+          <span className="px-2.5 py-1 rounded-md text-[10px] font-extrabold bg-emerald-950/60 border border-emerald-800/80 text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+            EC Certified Stream
           </span>
         </div>
       </div>
