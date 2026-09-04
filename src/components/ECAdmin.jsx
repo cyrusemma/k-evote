@@ -141,7 +141,7 @@ const INITIAL_CANDIDATES = [
     position: 'PRESIDENT',
     slate: 'The Vanguard Slate',
     status: 'VERIFIED',
-    photo_url: '',
+    photo_url: '/candidates/emmanuel_ampofo.jpg',
     manifesto: 'Digital Campus infrastructure, Wi-Fi overhaul, and rapid grievance settlement.',
     votes: 14230,
     disqualification_reason: null,
@@ -154,7 +154,7 @@ const INITIAL_CANDIDATES = [
     position: 'PRESIDENT',
     slate: 'Renaissance Coalition',
     status: 'VERIFIED',
-    photo_url: '',
+    photo_url: '/candidates/serwaa_akoto.jpg',
     manifesto: 'Transparency in hostel price regulation, bursary funding, and student welfare.',
     votes: 11420,
     disqualification_reason: null,
@@ -167,7 +167,7 @@ const INITIAL_CANDIDATES = [
     position: 'PRESIDENT',
     slate: 'Integrity Alliance',
     status: 'DISQUALIFIED',
-    photo_url: '',
+    photo_url: '/candidates/kofi_mensah.jpg',
     manifesto: 'Inclusive student leadership and subsidized shuttle fleet expansion.',
     votes: 0,
     disqualification_reason: 'Academic Standing (CWA < 60.0 statutory requirement)',
@@ -180,7 +180,7 @@ const INITIAL_CANDIDATES = [
     position: 'VICE_PRESIDENT',
     slate: 'The Vanguard Slate',
     status: 'VERIFIED',
-    photo_url: '',
+    photo_url: '/candidates/abena_koduah.jpg',
     manifesto: 'Academic mentoring networks and round-the-clock library resource access.',
     votes: 16800,
     disqualification_reason: null,
@@ -193,7 +193,7 @@ const INITIAL_CANDIDATES = [
     position: 'VICE_PRESIDENT',
     slate: 'Renaissance Coalition',
     status: 'VERIFIED',
-    photo_url: '',
+    photo_url: '/candidates/kwame_appiah.jpg',
     manifesto: 'Career incubator funding and campus safety light corridors.',
     votes: 9840,
     disqualification_reason: null,
@@ -206,7 +206,7 @@ const INITIAL_CANDIDATES = [
     position: 'WOMEN_COMMISSIONER',
     slate: 'Independent',
     status: 'VERIFIED',
-    photo_url: '',
+    photo_url: '/candidates/akua_mansa_sarfo.jpg',
     manifesto: 'Empowering female student entrepreneurs and sanitary supply stations.',
     votes: 18450,
     disqualification_reason: null,
@@ -219,7 +219,7 @@ const INITIAL_CANDIDATES = [
     position: 'WOMEN_COMMISSIONER',
     slate: 'The Vanguard Slate',
     status: 'PENDING_REVIEW',
-    photo_url: '',
+    photo_url: '/candidates/sandra_ampofo.jpg',
     manifesto: 'STEM mentorship and gender inclusivity symposiums.',
     votes: 8200,
     disqualification_reason: null,
@@ -232,7 +232,7 @@ const INITIAL_CANDIDATES = [
     position: 'PRESIDENT',
     slate: 'CoE Pioneers',
     status: 'VERIFIED',
-    photo_url: '',
+    photo_url: '/candidates/kwabena_darko.jpg',
     manifesto: 'Computer Engineering lab modernizations and hackathons.',
     votes: 4210,
     disqualification_reason: null,
@@ -245,7 +245,7 @@ const INITIAL_CANDIDATES = [
     position: 'PRESIDENT',
     slate: 'Innovate CoE',
     status: 'VERIFIED',
-    photo_url: '',
+    photo_url: '/candidates/priscilla_addo.jpg',
     manifesto: 'Software licenses and industry internships for engineering students.',
     votes: 2630,
     disqualification_reason: null,
@@ -258,7 +258,7 @@ const INITIAL_CANDIDATES = [
     position: 'HALL_PRESIDENT',
     slate: 'Unity Continentals',
     status: 'VERIFIED',
-    photo_url: '',
+    photo_url: '/candidates/francis_mensah.jpg',
     manifesto: 'Hall maintenance, water pressure pumps, and Continental heritage week.',
     votes: 1450,
     disqualification_reason: null,
@@ -271,7 +271,7 @@ const INITIAL_CANDIDATES = [
     position: 'MEMBER_OF_PARLIAMENT',
     slate: 'Ayeduase Voice',
     status: 'VERIFIED',
-    photo_url: '',
+    photo_url: '/candidates/portia_osei.jpg',
     manifesto: 'Street lighting in Ayeduase and hostel security patrols.',
     votes: 2890,
     disqualification_reason: null,
@@ -558,6 +558,23 @@ export default function ECAdmin({ navigate }) {
       'INFO',
       'CANDIDATE_VETTING'
     );
+  };
+
+  // Photo Management Modal State
+  const [photoModalCandidate, setPhotoModalCandidate] = useState(null);
+  const [editingPhotoUrl, setEditingPhotoUrl] = useState('');
+
+  const handleSaveCandidatePhoto = (candidateId, newPhotoUrl) => {
+    setCandidates((prev) =>
+      prev.map((c) => (c.id === candidateId ? { ...c, photo_url: newPhotoUrl } : c))
+    );
+    recordAuditLog(
+      'CANDIDATE_PHOTO_UPDATED',
+      `Candidate portrait updated for candidate ID [${candidateId}].`,
+      'INFO',
+      'CANDIDATE_VETTING'
+    );
+    setPhotoModalCandidate(null);
   };
 
   // Add Candidate Form
@@ -1406,6 +1423,18 @@ export default function ECAdmin({ navigate }) {
                           <span>Reinstate to Ballot</span>
                         </button>
                       )}
+
+                      <button
+                        type="button"
+                        disabled={!isCurrentElectionInScope}
+                        onClick={() => {
+                          setPhotoModalCandidate(cand);
+                          setEditingPhotoUrl(cand.photo_url || '');
+                        }}
+                        className="py-2.5 px-3 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold text-xs border border-slate-300 dark:border-slate-600 transition-colors disabled:opacity-40 min-h-[44px] touch-active flex items-center justify-center gap-1.5"
+                      >
+                        <span>📷 Change Photo</span>
+                      </button>
                     </div>
                   </div>
                 );
@@ -1502,6 +1531,19 @@ export default function ECAdmin({ navigate }) {
 
                         <td className="py-3 px-3 text-right">
                           <div className="flex items-center justify-end gap-1.5">
+                            <button
+                              type="button"
+                              disabled={!isCurrentElectionInScope}
+                              onClick={() => {
+                                setPhotoModalCandidate(cand);
+                                setEditingPhotoUrl(cand.photo_url || '');
+                              }}
+                              className="px-2.5 py-1 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold rounded-lg border border-slate-300 dark:border-slate-600 transition-colors cursor-pointer disabled:opacity-40"
+                              title="Update candidate portrait"
+                            >
+                              📷 Photo
+                            </button>
+
                             {isVerified && (
                               <button
                                 type="button"
@@ -1633,17 +1675,52 @@ export default function ECAdmin({ navigate }) {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">
-                  Photo URL
+                <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1 flex items-center justify-between">
+                  <span>Candidate Portrait</span>
+                  {newCandidate.photo_url && (
+                    <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">Image Attached</span>
+                  )}
                 </label>
-                <input
-                  type="url"
-                  disabled={!isCurrentElectionInScope}
-                  placeholder="https://..."
-                  value={newCandidate.photo_url}
-                  onChange={(e) => setNewCandidate((prev) => ({ ...prev, photo_url: e.target.value }))}
-                  className="w-full bg-[#F3FAF6] dark:bg-slate-900 border border-[#DDE5E1] dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#007A4D] disabled:opacity-50"
-                />
+                <div className="flex items-center gap-2">
+                  <input
+                    type="url"
+                    disabled={!isCurrentElectionInScope}
+                    placeholder="https://... or upload"
+                    value={newCandidate.photo_url.startsWith('data:') ? 'Image uploaded from device' : newCandidate.photo_url}
+                    onChange={(e) => setNewCandidate((prev) => ({ ...prev, photo_url: e.target.value }))}
+                    className="w-full bg-[#F3FAF6] dark:bg-slate-900 border border-[#DDE5E1] dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#007A4D] disabled:opacity-50"
+                  />
+                  <label className="cursor-pointer px-3 py-2 bg-[#007A4D]/10 hover:bg-[#007A4D]/20 border border-[#007A4D]/30 text-[#007A4D] dark:text-emerald-400 rounded-xl text-xs font-bold whitespace-nowrap transition-colors flex items-center gap-1.5 shrink-0">
+                    <span>📁 Upload</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onload = (evt) => {
+                            setNewCandidate((prev) => ({ ...prev, photo_url: evt.target.result }));
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                    />
+                  </label>
+                </div>
+                {newCandidate.photo_url && (
+                  <div className="mt-1.5 flex items-center gap-2">
+                    <img src={newCandidate.photo_url} alt="Candidate Preview" className="w-8 h-8 rounded-full object-cover border border-[#007A4D]" />
+                    <button
+                      type="button"
+                      onClick={() => setNewCandidate((prev) => ({ ...prev, photo_url: '' }))}
+                      className="text-[10px] text-rose-600 dark:text-rose-400 hover:underline font-bold"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                )}
               </div>
 
               <div>
@@ -2592,6 +2669,102 @@ export default function ECAdmin({ navigate }) {
                 className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-extrabold rounded-xl shadow-xs cursor-pointer"
               >
                 Confirm Disqualification
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Candidate Photo Update Modal ── */}
+      {photoModalCandidate && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-850 rounded-2xl max-w-md w-full p-5 border border-slate-200 dark:border-slate-700 shadow-2xl space-y-4 animate-in fade-in zoom-in duration-150">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-700/60 pb-3">
+              <div>
+                <h3 className="text-sm font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                  <span>📷</span> Update Candidate Portrait
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  {photoModalCandidate.full_name} — {photoModalCandidate.position?.replace(/_/g, ' ')}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPhotoModalCandidate(null)}
+                className="w-7 h-7 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center text-slate-400 font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Current / New Image Preview */}
+            <div className="flex flex-col items-center justify-center p-4 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-200 dark:border-slate-700/60 gap-2">
+              <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-[#007A4D] shadow-md bg-slate-200 dark:bg-slate-800 flex items-center justify-center">
+                {editingPhotoUrl ? (
+                  <img src={editingPhotoUrl} alt="Preview" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-2xl font-bold text-slate-400">
+                    {photoModalCandidate.full_name?.slice(0, 2).toUpperCase()}
+                  </span>
+                )}
+              </div>
+              <span className="text-[11px] text-slate-500 font-medium">Portrait Preview</span>
+            </div>
+
+            {/* File Upload Option */}
+            <div>
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                Upload New Photo from Device
+              </label>
+              <label className="flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-emerald-50 dark:bg-emerald-950/30 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 border-2 border-dashed border-emerald-400 dark:border-emerald-600/60 rounded-xl text-emerald-800 dark:text-emerald-300 font-bold text-xs cursor-pointer transition-colors">
+                <span>📁 Choose Image File</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onload = (evt) => {
+                        setEditingPhotoUrl(evt.target.result);
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                />
+              </label>
+            </div>
+
+            {/* Web URL Option */}
+            <div>
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Or Paste Image URL
+              </label>
+              <input
+                type="url"
+                placeholder="https://..."
+                value={editingPhotoUrl?.startsWith('data:') ? 'Image selected from device' : editingPhotoUrl}
+                onChange={(e) => setEditingPhotoUrl(e.target.value)}
+                className="w-full bg-[#F3FAF6] dark:bg-slate-900 border border-[#DDE5E1] dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#007A4D]"
+              />
+            </div>
+
+            {/* Modal Actions */}
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-700/60">
+              <button
+                type="button"
+                onClick={() => setPhotoModalCandidate(null)}
+                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-xs font-bold rounded-xl transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSaveCandidatePhoto(photoModalCandidate.id, editingPhotoUrl)}
+                className="px-4 py-2 bg-[#007A4D] hover:bg-[#075C42] text-white text-xs font-extrabold rounded-xl shadow-xs transition-colors"
+              >
+                Save Portrait
               </button>
             </div>
           </div>
