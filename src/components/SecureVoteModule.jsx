@@ -32,6 +32,7 @@ import ConstituencyModal from './ConstituencyModal';
 import StepUpAuthModal from './StepUpAuthModal';
 import DemoProfileSwitcher from './DemoProfileSwitcher';
 import CandidateComparisonModal from './CandidateComparisonModal';
+import FaceRecognitionModal from './FaceRecognitionModal';
 import {
   checkElectionEligibility,
   deriveYearOfStudy,
@@ -177,6 +178,7 @@ export default function SecureVoteModule({ navigate }) {
   const [isBiometricsModalOpen, setIsBiometricsModalOpen] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   const [isDossierOpen, setIsDossierOpen] = useState(false);
+  const [isFaceModalOpen, setIsFaceModalOpen] = useState(false);
 
   const handleVerifyBiometrics = async () => {
     // Check if device supports physical biometrics (WebAuthn Platform Authenticator)
@@ -254,12 +256,7 @@ export default function SecureVoteModule({ navigate }) {
   };
 
   const handleBiometricsClick = () => {
-    const biometricsOk = Boolean(student?.biometrics_completed_current_semester);
-    if (!biometricsOk) {
-      setIsBiometricsModalOpen(true);
-    } else {
-      showToast('Your biometrics are already verified for this semester.', 'success');
-    }
+    setIsFaceModalOpen(true);
   };
 
   // Check for route guard notification
@@ -1445,6 +1442,27 @@ export default function SecureVoteModule({ navigate }) {
         isOpen={isDossierOpen}
         onClose={() => setIsDossierOpen(false)}
         position="President"
+      />
+
+      {/* Realistic Biometric Face Recognition Modal */}
+      <FaceRecognitionModal
+        isOpen={isFaceModalOpen}
+        targetUser={student}
+        onSuccess={() => {
+          setIsFaceModalOpen(false);
+          setStudent(s => {
+            const updated = {
+              ...s,
+              biometrics_completed_current_semester: true
+            };
+            try {
+              localStorage.setItem('knust_user_session', JSON.stringify(updated));
+            } catch (e) { }
+            return updated;
+          });
+          showToast('Biometric Facial Recognition Verified & Certified!', 'success');
+        }}
+        onCancel={() => setIsFaceModalOpen(false)}
       />
     </div>
   );
