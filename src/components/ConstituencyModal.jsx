@@ -3,11 +3,11 @@ import { supabase } from '../lib/supabaseClient';
 import '../styles/SecureVote.css';
 
 const CONSTITUENCIES = [
-  { id: 'ayeduase', name: 'Ayeduase', desc: 'Ayeduase Hostels & Community Zone' },
-  { id: 'kotei_gaza', name: 'Kotei/Gaza', desc: 'Kotei, Gaza & Commercial Area Zone' },
-  { id: 'campus', name: 'Campus', desc: 'Traditional Halls & On-Campus Housing' },
-  { id: 'bomso', name: 'Bomso', desc: 'Bomso Gate & Adjacent Student Quarter' },
-  { id: 'kentinkrono', name: 'Kentinkrono', desc: 'Kentinkrono Hostels & Surrounding Perimeter' }
+  { id: 'ayeduase', name: 'Ayeduase', desc: 'Ayeduase Hostels & Community Zone', image: '/constituencies/ayeduase.jpg' },
+  { id: 'kotei_gaza', name: 'Kotei/Gaza', desc: 'Kotei, Gaza & Commercial Area Zone', image: '/constituencies/kotei_gaza.jpg' },
+  { id: 'campus', name: 'Campus', desc: 'Traditional Halls & On-Campus Housing', image: '/constituencies/campus.jpg' },
+  { id: 'bomso', name: 'Bomso', desc: 'Bomso Gate & Adjacent Student Quarter', image: '/constituencies/bomso.jpg' },
+  { id: 'kentinkrono', name: 'Kentinkrono', desc: 'Kentinkrono Hostels & Surrounding Perimeter', image: '/constituencies/kentinkrono.jpg' }
 ];
 
 export default function ConstituencyModal({ isOpen, onLocked, studentId }) {
@@ -77,7 +77,7 @@ export default function ConstituencyModal({ isOpen, onLocked, studentId }) {
           </div>
 
           {/* ── Selectable card list (scrollable container) ── */}
-          <div className="flex flex-col gap-2.5 overflow-y-auto max-h-[280px] sm:max-h-[340px] pr-1.5 focus:outline-none" role="radiogroup" aria-labelledby="constituency-title">
+          <div className="flex flex-col gap-2.5 overflow-y-auto max-h-[320px] sm:max-h-[380px] pr-1.5 focus:outline-none" role="radiogroup" aria-labelledby="constituency-title">
             {CONSTITUENCIES.map(item => {
               const isSelected = selectedConstituency === item.name;
               return (
@@ -85,7 +85,7 @@ export default function ConstituencyModal({ isOpen, onLocked, studentId }) {
                   key={item.id}
                   className={[
                     // Base card shell
-                    'group flex items-center gap-3.5 p-3.5 rounded-xl border cursor-pointer',
+                    'group flex items-center gap-3.5 p-3 rounded-xl border cursor-pointer',
                     'transition-all duration-150 select-none shrink-0',
                     // Selected state  — maroon border + light maroon tint
                     isSelected
@@ -95,7 +95,7 @@ export default function ConstituencyModal({ isOpen, onLocked, studentId }) {
                   ].join(' ')}
                   onClick={() => setSelectedConstituency(item.name)}
                 >
-                  {/* Hidden native radio — keeps semantics/keyboard/screen-reader intact */}
+                  {/* Hidden native radio */}
                   <input
                     type="radio"
                     name="knust_constituency"
@@ -105,48 +105,44 @@ export default function ConstituencyModal({ isOpen, onLocked, studentId }) {
                     className="sr-only"
                   />
 
+                  {/* Thumbnail Image */}
+                  <div className="w-14 h-12 rounded-lg overflow-hidden shrink-0 border border-slate-200 dark:border-slate-700 shadow-2xs">
+                    <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" />
+                  </div>
+
+                  {/* Text content */}
+                  <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+                    {/* Constituency name */}
+                    <span className={[
+                      'text-sm font-bold leading-snug',
+                      isSelected
+                        ? 'text-[#6b1d2f] dark:text-amber-400'
+                        : 'text-slate-900 dark:text-slate-100',
+                    ].join(' ')}>
+                      {item.name}
+                    </span>
+
+                    {/* Short description */}
+                    <span className="text-[11px] text-gray-500 dark:text-slate-400 leading-tight truncate">
+                      {item.desc}
+                    </span>
+                  </div>
+
                   {/* Custom circular indicator */}
                   <span
                     aria-hidden="true"
                     className={[
-                      'flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-150',
+                      'flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-150 ml-auto',
                       isSelected
                         ? 'border-[#6b1d2f] dark:border-amber-500 bg-[#6b1d2f] dark:bg-amber-500'
                         : 'border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 group-hover:border-gray-400 dark:group-hover:border-slate-500',
                     ].join(' ')}
                   >
-                    {/* Inner dot — only visible when selected */}
+                    {/* Inner dot */}
                     {isSelected && (
                       <span className="w-2 h-2 rounded-full bg-white dark:bg-slate-900 block" />
                     )}
                   </span>
-
-                  {/* Text content */}
-                  <div className="flex flex-col gap-0.5 min-w-0">
-                    {/* Constituency name — dark, semibold, high contrast */}
-                    <span className={[
-                      'text-sm font-semibold leading-snug',
-                      isSelected
-                        ? 'text-[#6b1d2f] dark:text-amber-400'
-                        : 'text-gray-900 dark:text-slate-100',
-                    ].join(' ')}>
-                      🏛️ {item.name} Constituency
-                    </span>
-                    {/* Zone description — muted, readable */}
-                    <span className="text-xs text-gray-500 dark:text-slate-400 leading-snug">
-                      {item.desc}
-                    </span>
-                  </div>
-
-                  {/* Selected check badge — right-aligned */}
-                  {isSelected && (
-                    <span
-                      aria-hidden="true"
-                      className="ml-auto shrink-0 text-xs font-bold px-2 py-0.5 rounded-full bg-[#6b1d2f] dark:bg-amber-500 text-white dark:text-slate-900"
-                    >
-                      ✓
-                    </span>
-                  )}
                 </label>
               );
             })}

@@ -55,6 +55,23 @@ function formatCountdown(ms) {
   return `${days}d : ${hours}h : ${minutes}m : ${seconds}s`;
 }
 
+function getElectionTierImage(e, student) {
+  const type = (e?.type || e?.tier || '').toLowerCase();
+  if (type.includes('src')) return '/tiers/src.jpg';
+  if (type.includes('dept') || type.includes('department') || type.includes('college')) return '/tiers/department.jpg';
+  if (type.includes('hall')) return '/tiers/hall.jpg';
+  if (type.includes('constituency')) {
+    const cVal = (student?.constituency || student?.constituency_locked || '').toLowerCase();
+    if (cVal.includes('ayeduase')) return '/constituencies/ayeduase.jpg';
+    if (cVal.includes('kotei') || cVal.includes('gaza')) return '/constituencies/kotei_gaza.jpg';
+    if (cVal.includes('campus')) return '/constituencies/campus.jpg';
+    if (cVal.includes('bomso')) return '/constituencies/bomso.jpg';
+    if (cVal.includes('kentinkrono')) return '/constituencies/kentinkrono.jpg';
+    return '/tiers/constituency.jpg';
+  }
+  return '/tiers/src.jpg';
+}
+
 function StudentProfilePopover({ student }) {
   const [isOpen, setIsOpen] = useState(false);
   const popoverRef = React.useRef(null);
@@ -732,21 +749,25 @@ export default function SecureVoteModule({ navigate }) {
             return (
               <div key={e.id} className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 shadow-sm flex flex-col justify-between space-y-4 knust-glass-card hover:-translate-y-0.5 transition-all">
                 {/* Header Area */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 dark:border-slate-700">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2.5 flex-wrap">
-                      <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 flex items-center justify-center border border-emerald-100 dark:border-emerald-900">
-                        <Building2 size={16} className="text-[#007A4D] dark:text-emerald-400" />
-                      </div>
-                      <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">{e.title}</h3>
-                      {isManagedByOfficer && (
-                        <span className="bg-amber-100 dark:bg-amber-950/80 text-amber-900 dark:text-amber-200 border border-amber-400 dark:border-amber-700 px-2.5 py-0.5 rounded-lg text-[11px] font-extrabold shadow-2xs inline-flex items-center gap-1.5" title="Officer votes use the exact same zero-knowledge encryption as general students.">
-                          <ShieldCheck size={12} />
-                          Conflict Protocol Verified / Ballot Encrypted
-                        </span>
-                      )}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-700">
+                  <div className="flex items-start gap-3.5 min-w-0">
+                    <div className="w-16 h-14 sm:w-20 sm:h-16 rounded-xl overflow-hidden shrink-0 border border-slate-200 dark:border-slate-700 shadow-2xs">
+                      <img src={getElectionTierImage(e, student)} alt={e.title} className="w-full h-full object-cover" />
                     </div>
-                    <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 space-y-1 mt-1.5">
+                    <div className="space-y-1 min-w-0">
+                      <div className="flex items-center gap-2.5 flex-wrap">
+                        <div className="w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 flex items-center justify-center border border-emerald-100 dark:border-emerald-900 shrink-0">
+                          <Building2 size={15} className="text-[#007A4D] dark:text-emerald-400" />
+                        </div>
+                        <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">{e.title}</h3>
+                        {isManagedByOfficer && (
+                          <span className="bg-amber-100 dark:bg-amber-950/80 text-amber-900 dark:text-amber-200 border border-amber-400 dark:border-amber-700 px-2.5 py-0.5 rounded-lg text-[11px] font-extrabold shadow-2xs inline-flex items-center gap-1.5" title="Officer votes use the exact same zero-knowledge encryption as general students.">
+                            <ShieldCheck size={12} />
+                            Conflict Protocol Verified / Ballot Encrypted
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 space-y-1 mt-1.5">
                       <span className="block"><strong className="text-slate-700 dark:text-slate-300">Eligibility:</strong> Verified ({targetText})</span>
                       <span className="block"><strong className="text-slate-700 dark:text-slate-300">Ends in:</strong> {statusInfo.countdownText}</span>
                       <span className="block">
@@ -759,7 +780,8 @@ export default function SecureVoteModule({ navigate }) {
                       </span>
                     </div>
                   </div>
-                  <div className="flex-shrink-0">
+                </div>
+                <div className="flex-shrink-0">
                     {hasVoted ? (
                       <span className="whitespace-nowrap inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-bold tracking-wide uppercase bg-emerald-100 text-emerald-800 border border-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-400 dark:border-emerald-800 gap-1.5 shadow-2xs">
                         <CheckCircle2 size={12} />
@@ -860,21 +882,25 @@ export default function SecureVoteModule({ navigate }) {
             return (
               <div key={e.id} className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 shadow-sm flex flex-col justify-between space-y-4 knust-glass-card hover:-translate-y-0.5 transition-all">
                 {/* Header Area */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 dark:border-slate-700">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2.5 flex-wrap">
-                      <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 flex items-center justify-center border border-emerald-100 dark:border-emerald-900">
-                        <GraduationCap size={16} className="text-[#007A4D] dark:text-emerald-400" />
-                      </div>
-                      <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">{e.title}</h3>
-                      {isManagedByOfficer && (
-                        <span className="bg-amber-100 dark:bg-amber-950/80 text-amber-900 dark:text-amber-200 border border-amber-400 dark:border-amber-700 px-2.5 py-0.5 rounded-lg text-[11px] font-extrabold shadow-2xs inline-flex items-center gap-1.5" title="Officer votes use the exact same zero-knowledge encryption as general students.">
-                          <ShieldCheck size={12} />
-                          Conflict Protocol Verified / Ballot Encrypted
-                        </span>
-                      )}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-700">
+                  <div className="flex items-start gap-3.5 min-w-0">
+                    <div className="w-16 h-14 sm:w-20 sm:h-16 rounded-xl overflow-hidden shrink-0 border border-slate-200 dark:border-slate-700 shadow-2xs">
+                      <img src={getElectionTierImage(e, student)} alt={e.title} className="w-full h-full object-cover" />
                     </div>
-                    <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 space-y-1 mt-1.5">
+                    <div className="space-y-1 min-w-0">
+                      <div className="flex items-center gap-2.5 flex-wrap">
+                        <div className="w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 flex items-center justify-center border border-emerald-100 dark:border-emerald-900 shrink-0">
+                          <GraduationCap size={15} className="text-[#007A4D] dark:text-emerald-400" />
+                        </div>
+                        <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">{e.title}</h3>
+                        {isManagedByOfficer && (
+                          <span className="bg-amber-100 dark:bg-amber-950/80 text-amber-900 dark:text-amber-200 border border-amber-400 dark:border-amber-700 px-2.5 py-0.5 rounded-lg text-[11px] font-extrabold shadow-2xs inline-flex items-center gap-1.5" title="Officer votes use the exact same zero-knowledge encryption as general students.">
+                            <ShieldCheck size={12} />
+                            Conflict Protocol Verified / Ballot Encrypted
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 space-y-1 mt-1.5">
                       <span className="block"><strong className="text-slate-700 dark:text-slate-300">Eligibility:</strong> Verified (All Students)</span>
                       <span className="block"><strong className="text-slate-700 dark:text-slate-300">Ends in:</strong> {statusInfo.countdownText}</span>
                       <span className="block">
@@ -887,7 +913,8 @@ export default function SecureVoteModule({ navigate }) {
                       </span>
                     </div>
                   </div>
-                  <div className="flex-shrink-0">
+                </div>
+                <div className="flex-shrink-0">
                     {hasVoted ? (
                       <span className="whitespace-nowrap inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-bold tracking-wide uppercase bg-emerald-100 text-emerald-800 border border-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-400 dark:border-emerald-800 gap-1.5 shadow-2xs">
                         <CheckCircle2 size={12} />
@@ -1000,21 +1027,25 @@ export default function SecureVoteModule({ navigate }) {
             return (
               <div key={e.id} className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 shadow-sm flex flex-col justify-between space-y-4 knust-glass-card hover:-translate-y-0.5 transition-all">
                 {/* Header Area */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 dark:border-slate-700">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2.5 flex-wrap">
-                      <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 flex items-center justify-center border border-emerald-100 dark:border-emerald-900">
-                        <Building size={16} className="text-[#007A4D] dark:text-emerald-400" />
-                      </div>
-                      <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">{e.title}</h3>
-                      {isManagedByOfficer && (
-                        <span className="bg-amber-100 dark:bg-amber-950/80 text-amber-900 dark:text-amber-200 border border-amber-400 dark:border-amber-700 px-2.5 py-0.5 rounded-lg text-[11px] font-extrabold shadow-2xs inline-flex items-center gap-1.5" title="Officer votes use the exact same zero-knowledge encryption as general students.">
-                          <ShieldCheck size={12} />
-                          Conflict Protocol Verified / Ballot Encrypted
-                        </span>
-                      )}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-700">
+                  <div className="flex items-start gap-3.5 min-w-0">
+                    <div className="w-16 h-14 sm:w-20 sm:h-16 rounded-xl overflow-hidden shrink-0 border border-slate-200 dark:border-slate-700 shadow-2xs">
+                      <img src={getElectionTierImage(e, student)} alt={e.title} className="w-full h-full object-cover" />
                     </div>
-                    <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 space-y-1 mt-1.5">
+                    <div className="space-y-1 min-w-0">
+                      <div className="flex items-center gap-2.5 flex-wrap">
+                        <div className="w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 flex items-center justify-center border border-emerald-100 dark:border-emerald-900 shrink-0">
+                          <Building size={15} className="text-[#007A4D] dark:text-emerald-400" />
+                        </div>
+                        <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">{e.title}</h3>
+                        {isManagedByOfficer && (
+                          <span className="bg-amber-100 dark:bg-amber-950/80 text-amber-900 dark:text-amber-200 border border-amber-400 dark:border-amber-700 px-2.5 py-0.5 rounded-lg text-[11px] font-extrabold shadow-2xs inline-flex items-center gap-1.5" title="Officer votes use the exact same zero-knowledge encryption as general students.">
+                            <ShieldCheck size={12} />
+                            Conflict Protocol Verified / Ballot Encrypted
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 space-y-1 mt-1.5">
                       <span className="block"><strong className="text-slate-700 dark:text-slate-300">Eligibility:</strong> Verified ({targetText})</span>
                       <span className="block"><strong className="text-slate-700 dark:text-slate-300">Ends in:</strong> {statusInfo.countdownText}</span>
                       <span className="block">
@@ -1027,7 +1058,8 @@ export default function SecureVoteModule({ navigate }) {
                       </span>
                     </div>
                   </div>
-                  <div className="flex-shrink-0">
+                </div>
+                <div className="flex-shrink-0">
                     {hasVoted ? (
                       <span className="bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 text-xs font-bold rounded-full px-3 py-1 inline-flex items-center gap-1.5 shadow-xs">
                         <CheckCircle2 size={12} />
@@ -1144,21 +1176,25 @@ export default function SecureVoteModule({ navigate }) {
             return (
               <div key={e.id} className={`bg-white dark:bg-slate-800 border ${!isEligible && !hasVoted ? 'border-rose-200 dark:border-rose-900/60' : 'border-slate-200 dark:border-slate-700'} rounded-2xl p-6 shadow-sm flex flex-col justify-between space-y-4 transition-all knust-glass-card hover:-translate-y-0.5`}>
                 {/* Header Area */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 dark:border-slate-700">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2.5 flex-wrap">
-                      <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 flex items-center justify-center border border-emerald-100 dark:border-emerald-900">
-                        <Home size={16} className="text-[#007A4D] dark:text-emerald-400" />
-                      </div>
-                      <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">{e.title}</h3>
-                      {isManagedByOfficer && (
-                        <span className="bg-amber-100 dark:bg-amber-950/80 text-amber-900 dark:text-amber-200 border border-amber-400 dark:border-amber-700 px-2.5 py-0.5 rounded-lg text-[11px] font-extrabold shadow-2xs inline-flex items-center gap-1.5" title="Officer votes use the exact same zero-knowledge encryption as general students.">
-                          <ShieldCheck size={12} />
-                          Conflict Protocol Verified / Ballot Encrypted
-                        </span>
-                      )}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-700">
+                  <div className="flex items-start gap-3.5 min-w-0">
+                    <div className="w-16 h-14 sm:w-20 sm:h-16 rounded-xl overflow-hidden shrink-0 border border-slate-200 dark:border-slate-700 shadow-2xs">
+                      <img src={getElectionTierImage(e, student)} alt={e.title} className="w-full h-full object-cover" />
                     </div>
-                    <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 space-y-1 mt-1.5">
+                    <div className="space-y-1 min-w-0">
+                      <div className="flex items-center gap-2.5 flex-wrap">
+                        <div className="w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 flex items-center justify-center border border-emerald-100 dark:border-emerald-900 shrink-0">
+                          <Home size={15} className="text-[#007A4D] dark:text-emerald-400" />
+                        </div>
+                        <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">{e.title}</h3>
+                        {isManagedByOfficer && (
+                          <span className="bg-amber-100 dark:bg-amber-950/80 text-amber-900 dark:text-amber-200 border border-amber-400 dark:border-amber-700 px-2.5 py-0.5 rounded-lg text-[11px] font-extrabold shadow-2xs inline-flex items-center gap-1.5" title="Officer votes use the exact same zero-knowledge encryption as general students.">
+                            <ShieldCheck size={12} />
+                            Conflict Protocol Verified / Ballot Encrypted
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 space-y-1 mt-1.5">
                       <span className="block"><strong className="text-slate-700 dark:text-slate-300">Eligibility:</strong> Verified ({targetText})</span>
                       <span className="block"><strong className="text-slate-700 dark:text-slate-300">Ends in:</strong> {statusInfo.countdownText}</span>
                       <span className="block">
@@ -1171,7 +1207,8 @@ export default function SecureVoteModule({ navigate }) {
                       </span>
                     </div>
                   </div>
-                  <div className="flex-shrink-0">
+                </div>
+                <div className="flex-shrink-0">
                     {hasVoted ? (
                       <span className="bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 text-xs font-bold rounded-full px-3 py-1 inline-flex items-center gap-1.5 shadow-xs">
                         <CheckCircle2 size={12} />

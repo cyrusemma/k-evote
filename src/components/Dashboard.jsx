@@ -46,6 +46,23 @@ function goTo(path, navigate) {
   }
 }
 
+function getElectionTierImage(e, student) {
+  const type = (e?.type || e?.tier || '').toLowerCase();
+  if (type.includes('src')) return '/tiers/src.jpg';
+  if (type.includes('dept') || type.includes('department') || type.includes('college')) return '/tiers/department.jpg';
+  if (type.includes('hall')) return '/tiers/hall.jpg';
+  if (type.includes('constituency')) {
+    const cVal = (student?.constituency || student?.constituency_locked || '').toLowerCase();
+    if (cVal.includes('ayeduase')) return '/constituencies/ayeduase.jpg';
+    if (cVal.includes('kotei') || cVal.includes('gaza')) return '/constituencies/kotei_gaza.jpg';
+    if (cVal.includes('campus')) return '/constituencies/campus.jpg';
+    if (cVal.includes('bomso')) return '/constituencies/bomso.jpg';
+    if (cVal.includes('kentinkrono')) return '/constituencies/kentinkrono.jpg';
+    return '/tiers/constituency.jpg';
+  }
+  return '/tiers/src.jpg';
+}
+
 export default function Dashboard({ navigate }) {
   const { student: sessionStudent, loading: loadingSession } = useStudentSession();
   const [student, setStudent] = useState(null);
@@ -345,17 +362,22 @@ export default function Dashboard({ navigate }) {
                       key={e.id}
                       className="p-4 rounded-2xl bg-white dark:bg-slate-800/90 border border-gray-200 dark:border-slate-700 shadow-xs flex flex-col gap-3 transition-all"
                     >
-                      {/* Top: Title, Tier & Status */}
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <h3 className="font-extrabold text-sm text-slate-900 dark:text-slate-100 m-0 leading-snug">
-                            {e.title}
-                          </h3>
-                          {e.jurisdiction?.name && (
-                            <span className="inline-block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5">
-                              📍 {e.jurisdiction.name}
-                            </span>
-                          )}
+                      {/* Top: Title, Tier & Status with Thumbnail */}
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-start gap-3 min-w-0">
+                          <div className="w-14 h-12 rounded-xl overflow-hidden shrink-0 border border-slate-200 dark:border-slate-700 shadow-2xs">
+                            <img src={getElectionTierImage(e, student)} alt={e.title} className="w-full h-full object-cover" />
+                          </div>
+                          <div className="min-w-0">
+                            <h3 className="font-extrabold text-sm text-slate-900 dark:text-slate-100 m-0 leading-snug">
+                              {e.title}
+                            </h3>
+                            {e.jurisdiction?.name && (
+                              <span className="inline-block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5">
+                                📍 {e.jurisdiction.name}
+                              </span>
+                            )}
+                          </div>
                         </div>
 
                         {/* Status Pill */}
@@ -500,18 +522,25 @@ export default function Dashboard({ navigate }) {
                       return (
                         <tr key={e.id}>
                           <td className="py-3.5 px-3">
-                            <strong className="text-slate-800 dark:text-slate-200">{e.title}</strong>
-                            {e.jurisdiction?.name && (
-                              <span className="sv-elec-juris block text-xs text-slate-500 dark:text-slate-400">
-                                {e.jurisdiction.name}
-                              </span>
-                            )}
-                            {!elig.eligible && !hasVoted && elig.reason && (
-                              <div className="text-[11px] text-rose-600 dark:text-rose-400 font-medium mt-0.5 flex items-center gap-1">
-                                <ShieldAlert size={11} />
-                                <span>{elig.reason}</span>
+                            <div className="flex items-center gap-3">
+                              <div className="w-12 h-10 rounded-lg overflow-hidden shrink-0 border border-slate-200 dark:border-slate-700 shadow-2xs">
+                                <img src={getElectionTierImage(e, student)} alt={e.title} className="w-full h-full object-cover" />
                               </div>
-                            )}
+                              <div>
+                                <strong className="text-slate-800 dark:text-slate-200">{e.title}</strong>
+                                {e.jurisdiction?.name && (
+                                  <span className="sv-elec-juris block text-xs text-slate-500 dark:text-slate-400">
+                                    {e.jurisdiction.name}
+                                  </span>
+                                )}
+                                {!elig.eligible && !hasVoted && elig.reason && (
+                                  <div className="text-[11px] text-rose-600 dark:text-rose-400 font-medium mt-0.5 flex items-center gap-1">
+                                    <ShieldAlert size={11} />
+                                    <span>{elig.reason}</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
                           </td>
                           <td className="py-3.5 px-3 min-w-[140px] text-center">
                             {hasVoted ? (
