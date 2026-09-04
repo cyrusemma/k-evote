@@ -23,11 +23,26 @@ import {
 function buildStatusBadge(status) {
   const normalized = String(status || 'ACTIVE').toUpperCase();
   const colorMap = {
-    ACTIVE: { bg: 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400', label: 'ACTIVE' },
-    PAUSED: { bg: 'bg-amber-500/10 border-amber-500/30 text-amber-400', label: 'PAUSED' },
-    CLOSED: { bg: 'bg-rose-500/10 border-rose-500/30 text-rose-400', label: 'CLOSED' },
-    SCHEDULED: { bg: 'bg-blue-500/10 border-blue-500/30 text-blue-400', label: 'SCHEDULED' },
-    UNKNOWN: { bg: 'bg-slate-500/10 border-slate-500/30 text-slate-400', label: 'UNKNOWN' },
+    ACTIVE: { 
+      bg: 'bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-500/10 dark:border-emerald-500/30 dark:text-emerald-400', 
+      label: 'ACTIVE' 
+    },
+    PAUSED: { 
+      bg: 'bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-500/10 dark:border-amber-500/30 dark:text-amber-400', 
+      label: 'PAUSED' 
+    },
+    CLOSED: { 
+      bg: 'bg-rose-50 text-rose-800 border-rose-200 dark:bg-rose-500/10 dark:border-rose-500/30 dark:text-rose-400', 
+      label: 'CLOSED' 
+    },
+    SCHEDULED: { 
+      bg: 'bg-blue-50 text-blue-800 border-blue-200 dark:bg-blue-500/10 dark:border-blue-500/30 dark:text-blue-400', 
+      label: 'SCHEDULED' 
+    },
+    UNKNOWN: { 
+      bg: 'bg-slate-100 text-slate-700 border-slate-300 dark:bg-slate-500/10 dark:border-slate-500/30 dark:text-slate-400', 
+      label: 'UNKNOWN' 
+    },
   };
   return colorMap[normalized] || colorMap.ACTIVE;
 }
@@ -98,35 +113,20 @@ export default function CandidateAgentRoom({ navigate }) {
         setFinalAuditHash('SHA256: 9821a3f019c82e71b2d3e4f5a6b7c8d9');
       }
     }
-    setTimeout(() => setIsRefreshing(false), 600);
+    setIsRefreshing(false);
   };
-
-  useEffect(() => {
-    if (!context || !context.election_id) return;
-
-    refreshMonitoring();
-    const timer = setInterval(refreshMonitoring, 10000);
-
-    return () => {
-      if (timer) clearInterval(timer);
-    };
-  }, [context]);
 
   const isRoomClosed = context?.room_status === 'CLOSED' || context?.room_active === false;
 
   const handleSignOff = async () => {
-    if (!context) return;
+    if (signOffState.signed || signOffState.loading) return;
     setSignOffState({ signed: false, loading: true, message: '' });
+
+    const acknowledgement = 'I acknowledge the final cryptographic audit verification results.';
+    const turnoutSnapshot = turnout;
+
     try {
-      const acknowledgement = `Candidate agent ${context.candidate_name || 'Observer'} signed off on turnout at ${new Date().toISOString()}`;
-      const turnoutSnapshot = {
-        turnout_count: turnout,
-        turnout_percentage: turnoutPercentage,
-        checked_at: new Date().toISOString(),
-      };
-      await supabase.rpc('record_candidate_agent_signoff', {
-        p_student_id: context.student_id,
-        p_room_id: context.room_id,
+      await supabase.rpc('sign_off_election_room', {
         p_election_id: context.election_id,
         p_member_id: context.member_id,
         p_acknowledgement: acknowledgement,
@@ -140,10 +140,10 @@ export default function CandidateAgentRoom({ navigate }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-900 text-slate-100 flex items-center justify-center p-6 font-sans">
+      <div className="min-h-screen bg-[#F5F7F8] dark:bg-slate-900 text-slate-900 dark:text-slate-100 flex items-center justify-center p-6 font-sans transition-colors duration-200">
         <div className="flex flex-col items-center gap-3">
-          <RefreshCw className="w-8 h-8 text-emerald-500 animate-spin" />
-          <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Loading Observer Context...</p>
+          <RefreshCw className="w-8 h-8 text-[#007A4D] dark:text-emerald-500 animate-spin" />
+          <p className="text-xs text-slate-600 dark:text-slate-400 font-semibold uppercase tracking-wider">Loading Observer Context...</p>
         </div>
       </div>
     );
@@ -154,33 +154,33 @@ export default function CandidateAgentRoom({ navigate }) {
   const statusBadge = buildStatusBadge(context?.room_status);
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 p-3 sm:p-6 font-sans antialiased selection:bg-emerald-500 selection:text-slate-950">
+    <div className="min-h-screen bg-[#F5F7F8] dark:bg-slate-900 text-slate-900 dark:text-slate-100 p-3 sm:p-6 font-sans antialiased transition-colors duration-200">
       <div className="max-w-5xl mx-auto space-y-6">
 
         {/* ── Header View Switcher Navigation Card ── */}
-        <header className="bg-slate-950/80 border border-slate-800/80 rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-2xl backdrop-blur-md">
+        <header className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-sm dark:shadow-xl backdrop-blur-md transition-colors">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center justify-center text-xl shadow-inner">
+            <div className="w-12 h-12 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-xl flex items-center justify-center text-xl shadow-xs">
               🗳️
             </div>
             <div>
-              <h1 className="text-base sm:text-lg font-black text-white tracking-wide m-0 font-display">
+              <h1 className="text-base sm:text-lg font-black text-slate-900 dark:text-white tracking-wide m-0">
                 Observer Console
               </h1>
-              <p className="text-xs text-slate-400 mt-0.5 m-0 font-medium leading-relaxed">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 m-0 font-medium leading-relaxed">
                 Dedicated real-time turnout monitoring &amp; verification portal for accredited candidate representatives.
               </p>
             </div>
           </div>
 
-          <div className="flex items-center bg-slate-900 border border-slate-800/80 p-1 rounded-xl w-full md:w-auto font-sans">
+          <div className="flex items-center bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 p-1 rounded-xl w-full md:w-auto font-sans">
             <button
               type="button"
               onClick={() => setObserverViewMode('dashboard')}
               className={`flex-1 md:flex-none px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 min-h-[38px] ${
                 observerViewMode === 'dashboard'
-                  ? 'bg-emerald-600 text-white shadow-md'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-850'
+                  ? 'bg-[#007A4D] dark:bg-emerald-600 text-white shadow-xs'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-700/50'
               }`}
             >
               <Activity className="w-3.5 h-3.5" />
@@ -191,8 +191,8 @@ export default function CandidateAgentRoom({ navigate }) {
               onClick={() => setObserverViewMode('roster')}
               className={`flex-1 md:flex-none px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 min-h-[38px] ${
                 observerViewMode === 'roster'
-                  ? 'bg-emerald-600 text-white shadow-md'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-850'
+                  ? 'bg-[#007A4D] dark:bg-emerald-600 text-white shadow-xs'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-700/50'
               }`}
             >
               <Users className="w-3.5 h-3.5" />
@@ -206,18 +206,18 @@ export default function CandidateAgentRoom({ navigate }) {
           <div className="space-y-6">
 
             {/* Status Panel Banner */}
-            <div className="bg-slate-950/70 border border-slate-800/60 rounded-2xl p-5 shadow-xl backdrop-blur-md flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm dark:shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 transition-colors">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <span className="relative flex h-2.5 w-2.5">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
                   </span>
-                  <span className="text-[10px] font-extrabold uppercase tracking-widest text-emerald-400 font-mono">
+                  <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#007A4D] dark:text-emerald-400 font-mono">
                     Real-Time Secure Broadcast Active
                   </span>
                 </div>
-                <h2 className="text-lg sm:text-xl font-black text-white m-0 tracking-tight font-display uppercase">
+                <h2 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white m-0 tracking-tight uppercase">
                   Polling Station Audit Console
                 </h2>
               </div>
@@ -226,14 +226,14 @@ export default function CandidateAgentRoom({ navigate }) {
                 <span className={`px-3 py-1.5 rounded-lg text-[10px] font-black border tracking-wider uppercase ${statusBadge.bg}`}>
                   ● {statusBadge.label}
                 </span>
-                <span className="px-3 py-1.5 rounded-lg text-[10px] font-black bg-slate-850 border border-slate-700/60 text-slate-355 tracking-wider uppercase flex items-center gap-1">
-                  <Eye className="w-3 h-3 text-slate-400" />
+                <span className="px-3 py-1.5 rounded-lg text-[10px] font-black bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 tracking-wider uppercase flex items-center gap-1">
+                  <Eye className="w-3 h-3 text-slate-500 dark:text-slate-400" />
                   Observer Mode
                 </span>
                 <button 
                   onClick={refreshMonitoring}
                   disabled={isRefreshing}
-                  className="p-1.5 bg-slate-850 hover:bg-slate-800 border border-slate-750 text-slate-350 hover:text-white rounded-lg transition-all cursor-pointer disabled:opacity-40"
+                  className="p-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-lg transition-all cursor-pointer disabled:opacity-40"
                   title="Manual Sync Ledger"
                 >
                   <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
@@ -243,53 +243,53 @@ export default function CandidateAgentRoom({ navigate }) {
 
             {/* Badge Profile Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-slate-950/50 border border-slate-800/80 rounded-2xl p-4 flex items-center gap-3.5 shadow-sm hover:border-slate-700/50 transition-all duration-300">
-                <div className="w-10 h-10 bg-emerald-600/10 border border-emerald-500/20 text-emerald-400 rounded-xl flex items-center justify-center shrink-0">
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex items-center gap-3.5 shadow-xs hover:border-[#007A4D]/50 transition-all duration-300">
+                <div className="w-10 h-10 bg-emerald-50 dark:bg-emerald-600/10 border border-emerald-200 dark:border-emerald-500/20 text-[#007A4D] dark:text-emerald-400 rounded-xl flex items-center justify-center shrink-0">
                   <Globe className="w-5 h-5" />
                 </div>
                 <div className="min-w-0">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Election Jurisdiction</span>
-                  <span className="text-sm font-extrabold text-white truncate block mt-0.5">{electionTitle}</span>
+                  <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Election Jurisdiction</span>
+                  <span className="text-sm font-extrabold text-slate-900 dark:text-white truncate block mt-0.5">{electionTitle}</span>
                 </div>
               </div>
 
-              <div className="bg-slate-950/50 border border-slate-800/80 rounded-2xl p-4 flex items-center gap-3.5 shadow-sm hover:border-slate-700/50 transition-all duration-300">
-                <div className="w-10 h-10 bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-xl flex items-center justify-center shrink-0">
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex items-center gap-3.5 shadow-xs hover:border-amber-500/50 transition-all duration-300">
+                <div className="w-10 h-10 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-amber-700 dark:text-amber-400 rounded-xl flex items-center justify-center shrink-0">
                   <ShieldCheck className="w-5 h-5" />
                 </div>
                 <div className="min-w-0">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Logged In Representative</span>
-                  <span className="text-sm font-extrabold text-amber-400 truncate block mt-0.5">Agent — {candidateName}</span>
+                  <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Logged In Representative</span>
+                  <span className="text-sm font-extrabold text-amber-700 dark:text-amber-400 truncate block mt-0.5">Agent — {candidateName}</span>
                 </div>
               </div>
             </div>
 
             {/* Graphical Turnout Meter Card */}
-            <div className="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 shadow-lg space-y-4 hover:border-slate-750 transition-all duration-300">
-              <div className="flex items-center justify-between border-b border-slate-850 pb-3">
-                <h3 className="text-xs font-black uppercase tracking-wider text-emerald-400 m-0 flex items-center gap-2">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs space-y-4 transition-all duration-300">
+              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                <h3 className="text-xs font-black uppercase tracking-wider text-[#007A4D] dark:text-emerald-400 m-0 flex items-center gap-2">
                   <BarChart3 className="w-4 h-4" />
                   Real-Time Turnout Progress
                 </h3>
-                <span className="text-[10px] font-bold bg-slate-900 border border-slate-800 text-slate-400 px-2 py-0.5 rounded-md">
+                <span className="text-[10px] font-bold bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 px-2 py-0.5 rounded-md">
                   Live Stream
                 </span>
               </div>
 
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
                 <div className="space-y-0.5">
-                  <span className="text-xs font-semibold text-slate-400 block">Total Valid Ballots Counted:</span>
-                  <span className="text-3xl font-black text-white font-mono tracking-tight block">
+                  <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 block">Total Valid Ballots Counted:</span>
+                  <span className="text-3xl font-black text-slate-900 dark:text-white font-mono tracking-tight block">
                     {Number(turnout).toLocaleString()}
                   </span>
                 </div>
 
-                <div className="px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center gap-2.5 self-start sm:self-center">
+                <div className="px-4 py-2 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-xl flex items-center gap-2.5 self-start sm:self-center">
                   <div className="relative flex h-2 w-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
                   </div>
-                  <span className="text-sm font-black text-emerald-400 font-mono">
+                  <span className="text-sm font-black text-[#007A4D] dark:text-emerald-400 font-mono">
                     {turnoutPercentage}% Overall Turnout
                   </span>
                 </div>
@@ -297,13 +297,13 @@ export default function CandidateAgentRoom({ navigate }) {
 
               {/* Styled horizontal progress bar */}
               <div className="space-y-1 pt-2">
-                <div className="w-full bg-slate-900 border border-slate-800/85 h-3.5 rounded-full overflow-hidden p-0.5 shadow-inner">
+                <div className="w-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 h-3.5 rounded-full overflow-hidden p-0.5 shadow-inner">
                   <div 
-                    className="bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-400 h-full rounded-full transition-all duration-700 ease-out shadow-xs" 
+                    className="bg-gradient-to-r from-[#007A4D] via-emerald-500 to-teal-400 h-full rounded-full transition-all duration-700 ease-out shadow-xs" 
                     style={{ width: `${turnoutPercentage}%` }} 
                   />
                 </div>
-                <div className="flex justify-between text-[9px] font-bold text-slate-505 font-mono tracking-wider pt-0.5">
+                <div className="flex justify-between text-[9px] font-bold text-slate-400 dark:text-slate-500 font-mono tracking-wider pt-0.5">
                   <span>0%</span>
                   <span>50%</span>
                   <span>100%</span>
@@ -312,13 +312,13 @@ export default function CandidateAgentRoom({ navigate }) {
             </div>
 
             {/* Cryptographic Ledger & Audit Logs */}
-            <div className="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 shadow-lg space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-850 pb-3">
-                <h3 className="text-xs font-black uppercase tracking-wider text-emerald-400 m-0 flex items-center gap-2">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs space-y-4 transition-colors">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
+                <h3 className="text-xs font-black uppercase tracking-wider text-[#007A4D] dark:text-emerald-400 m-0 flex items-center gap-2">
                   <Database className="w-4 h-4" />
                   Decoupled Mathematical Audit Trail
                 </h3>
-                <span className="text-[10px] font-bold font-mono text-emerald-300 bg-emerald-950/80 border border-emerald-900/60 px-2.5 py-1 rounded-lg">
+                <span className="text-[10px] font-bold font-mono text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-200 dark:border-emerald-900/60 px-2.5 py-1 rounded-lg">
                   ✓ Ledger Match: Audit logs ({Number(turnout).toLocaleString()}) == Decrypted Ballots ({Number(turnout).toLocaleString()})
                 </span>
               </div>
@@ -327,18 +327,18 @@ export default function CandidateAgentRoom({ navigate }) {
                 {recentHashes.map((item, index) => (
                   <div
                     key={index}
-                    className="flex items-center justify-between p-3.5 rounded-xl bg-slate-900/40 border border-slate-800 text-xs hover:border-emerald-500/35 hover:-translate-y-0.5 transform transition-all duration-300 shadow-xs"
+                    className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-xs hover:border-[#007A4D]/40 dark:hover:border-emerald-500/35 hover:-translate-y-0.5 transform transition-all duration-300 shadow-2xs"
                   >
                     <div className="flex items-center gap-2.5">
                       <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50" />
                       <div>
-                        <span className="text-[10px] text-slate-550 block uppercase font-bold tracking-wider">Transaction Block</span>
-                        <code className="text-emerald-300 font-bold font-mono text-xs mt-0.5 block">#{item.hash}</code>
+                        <span className="text-[10px] text-slate-500 dark:text-slate-400 block uppercase font-bold tracking-wider">Transaction Block</span>
+                        <code className="text-[#007A4D] dark:text-emerald-300 font-bold font-mono text-xs mt-0.5 block">#{item.hash}</code>
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-1 font-sans">
-                      <span className="text-slate-500 font-semibold font-mono text-[10px]">{item.timestamp}</span>
-                      <span className="px-2 py-0.5 rounded-md bg-emerald-950/80 border border-emerald-900/40 text-emerald-450 text-[9px] font-black uppercase tracking-wider">
+                      <span className="text-slate-400 dark:text-slate-500 font-semibold font-mono text-[10px]">{item.timestamp}</span>
+                      <span className="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 dark:bg-emerald-950/80 dark:border-emerald-900/40 dark:text-emerald-300 text-[9px] font-black uppercase tracking-wider">
                         ✓ {item.status}
                       </span>
                     </div>
@@ -348,13 +348,13 @@ export default function CandidateAgentRoom({ navigate }) {
             </div>
 
             {/* Polling Station breakdown grid */}
-            <div className="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 shadow-lg space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-850 pb-3">
-                <h3 className="text-xs font-black uppercase tracking-wider text-emerald-400 m-0 flex items-center gap-2">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs space-y-4 transition-colors">
+              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                <h3 className="text-xs font-black uppercase tracking-wider text-[#007A4D] dark:text-emerald-400 m-0 flex items-center gap-2">
                   <Users className="w-4 h-4" />
                   Station Turnout breakdown
                 </h3>
-                <span className="text-[10px] font-bold text-slate-400">0 anomalies flagged</span>
+                <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400">0 anomalies flagged</span>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
@@ -364,22 +364,22 @@ export default function CandidateAgentRoom({ navigate }) {
                   { name: 'College of Engineering (CoE)', cast: 8210, total: 11500, pct: 71.4, type: 'college' },
                   { name: 'Science & Off-Campus Perimeter', cast: 9495, total: 17700, pct: 53.6, type: 'offcampus' },
                 ].map((block) => (
-                  <div key={block.name} className="p-4 bg-slate-900/40 border border-slate-800/60 rounded-xl space-y-3 hover:border-slate-700/50 transition-all duration-300">
+                  <div key={block.name} className="p-4 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 rounded-xl space-y-3 hover:border-slate-300 dark:hover:border-slate-600 transition-all duration-300">
                     <div className="flex items-start justify-between gap-3 text-xs">
                       <div>
-                        <strong className="text-slate-100 font-extrabold text-sm">{block.name}</strong>
-                        <span className="text-[10px] text-slate-500 font-bold block mt-0.5 uppercase tracking-wider">Polling District</span>
+                        <strong className="text-slate-900 dark:text-slate-100 font-extrabold text-sm">{block.name}</strong>
+                        <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold block mt-0.5 uppercase tracking-wider">Polling District</span>
                       </div>
-                      <span className="font-mono font-bold text-emerald-400 bg-emerald-500/5 border border-emerald-500/10 px-2 py-0.5 rounded-md text-[11px]">
+                      <span className="font-mono font-bold text-[#007A4D] dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 px-2 py-0.5 rounded-md text-[11px]">
                         {block.pct}%
                       </span>
                     </div>
 
                     <div className="space-y-1.5">
-                      <div className="w-full bg-slate-950 border border-slate-850 h-2.5 rounded-full overflow-hidden p-0.5">
-                        <div className="bg-emerald-500 h-full rounded-full" style={{ width: `${block.pct}%` }} />
+                      <div className="w-full bg-slate-200 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 h-2.5 rounded-full overflow-hidden p-0.5">
+                        <div className="bg-[#007A4D] dark:bg-emerald-500 h-full rounded-full" style={{ width: `${block.pct}%` }} />
                       </div>
-                      <div className="flex justify-between text-[10px] font-bold text-slate-400 font-mono">
+                      <div className="flex justify-between text-[10px] font-bold text-slate-500 dark:text-slate-400 font-mono">
                         <span>Cast: {block.cast.toLocaleString()}</span>
                         <span>Total: {block.total.toLocaleString()}</span>
                       </div>
@@ -390,12 +390,12 @@ export default function CandidateAgentRoom({ navigate }) {
             </div>
 
             {/* Export Terminal Container */}
-            <div className="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 shadow-lg space-y-4">
-              <h3 className="text-xs font-black uppercase tracking-wider text-amber-400 m-0 flex items-center gap-2">
-                <FileText className="w-4 h-4 text-amber-550" />
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs space-y-4 transition-colors">
+              <h3 className="text-xs font-black uppercase tracking-wider text-amber-700 dark:text-amber-400 m-0 flex items-center gap-2">
+                <FileText className="w-4 h-4 text-amber-600 dark:text-amber-400" />
                 Accredited Agent Data Export Suite
               </h3>
-              <p className="text-xs text-slate-400 leading-relaxed m-0 font-medium">
+              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed m-0 font-medium">
                 Accredited monitors can export chronological, anonymized event tallies and station turnout matrices to verify counts on external audit programs.
               </p>
 
@@ -415,9 +415,9 @@ export default function CandidateAgentRoom({ navigate }) {
                     link.click();
                     link.remove();
                   }}
-                  className="flex-1 px-4 py-3 rounded-xl bg-slate-900 hover:bg-slate-850 border border-slate-800 text-slate-205 hover:text-white text-xs font-extrabold transition-all cursor-pointer flex items-center justify-center gap-2 min-h-[44px]"
+                  className="flex-1 px-4 py-3 rounded-xl bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-750 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-extrabold transition-all cursor-pointer flex items-center justify-center gap-2 min-h-[44px]"
                 >
-                  <Download className="w-4 h-4 text-slate-455" />
+                  <Download className="w-4 h-4 text-slate-500 dark:text-slate-400" />
                   <span>Download Audit Log (CSV)</span>
                 </button>
 
@@ -444,32 +444,32 @@ export default function CandidateAgentRoom({ navigate }) {
                     link.click();
                     link.remove();
                   }}
-                  className="flex-1 px-4 py-3 rounded-xl bg-slate-900 hover:bg-slate-850 border border-slate-800 text-slate-205 hover:text-white text-xs font-extrabold transition-all cursor-pointer flex items-center justify-center gap-2 min-h-[44px]"
+                  className="flex-1 px-4 py-3 rounded-xl bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-750 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-extrabold transition-all cursor-pointer flex items-center justify-center gap-2 min-h-[44px]"
                 >
-                  <Download className="w-4 h-4 text-slate-455" />
+                  <Download className="w-4 h-4 text-slate-500 dark:text-slate-400" />
                   <span>Export Station Matrix (JSON)</span>
                 </button>
               </div>
             </div>
 
-            {/* Privacy Warn Warning Card */}
-            <div className="flex items-start gap-3 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs leading-relaxed">
-              <AlertTriangle className="w-4 h-4 shrink-0 text-amber-500 mt-0.5" />
+            {/* Privacy Warning Card */}
+            <div className="flex items-start gap-3 p-4 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-amber-900 dark:text-amber-300 text-xs leading-relaxed">
+              <AlertTriangle className="w-4 h-4 shrink-0 text-amber-600 dark:text-amber-400 mt-0.5" />
               <p className="m-0 font-medium">
                 <strong>Anonymity Guard Enforced:</strong> Candidate-specific ballot tallies are encrypted at submission and only unlocked by EC secret keys when polls are completely finalized. Only cumulative turnout counts are visible during the active voting session.
               </p>
             </div>
 
             {/* Sign Off Verification Suite */}
-            <div className="pt-4 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="text-xs font-semibold text-slate-400">
+            <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="text-xs font-semibold text-slate-500 dark:text-slate-400">
                 {isRoomClosed ? (
-                  <span className="text-emerald-400 font-bold flex items-center gap-1.5">
+                  <span className="text-[#007A4D] dark:text-emerald-400 font-bold flex items-center gap-1.5">
                     <CheckCircle2 className="w-4 h-4" /> Polls Terminated — Observer Verification Ready
                   </span>
                 ) : (
                   <span className="flex items-center gap-1.5">
-                    <Clock className="w-4 h-4 text-slate-550" /> Voting Underway — Continuous Ledger Validation Active
+                    <Clock className="w-4 h-4 text-slate-400" /> Voting Underway — Continuous Ledger Validation Active
                   </span>
                 )}
               </div>
@@ -479,7 +479,7 @@ export default function CandidateAgentRoom({ navigate }) {
                   <button
                     onClick={handleSignOff}
                     disabled={signOffState.signed || signOffState.loading}
-                    className="w-full sm:w-auto px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-extrabold text-xs shadow-md transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed min-h-[44px]"
+                    className="w-full sm:w-auto px-5 py-3 rounded-xl bg-[#007A4D] hover:bg-[#075C42] text-white font-extrabold text-xs shadow-md transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed min-h-[44px]"
                   >
                     {signOffState.loading ? 'Signing Ledger...' : signOffState.signed ? '✓ Signed Off' : 'Acknowledge & Sign Off'}
                   </button>
@@ -487,7 +487,7 @@ export default function CandidateAgentRoom({ navigate }) {
 
                 <button
                   onClick={() => navigate && navigate('/')}
-                  className="w-full sm:w-auto px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-750 text-slate-205 hover:text-white font-extrabold text-xs border border-slate-700 transition-all cursor-pointer min-h-[44px]"
+                  className="w-full sm:w-auto px-5 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-200 font-extrabold text-xs border border-slate-300 dark:border-slate-700 transition-all cursor-pointer min-h-[44px]"
                 >
                   Return to Dashboard
                 </button>
@@ -495,7 +495,7 @@ export default function CandidateAgentRoom({ navigate }) {
             </div>
 
             {signOffState.message && (
-              <div className="text-xs text-emerald-400 font-bold bg-emerald-950/80 border border-emerald-800/60 p-3 rounded-xl text-center">
+              <div className="text-xs text-emerald-800 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-200 dark:border-emerald-800/60 p-3 rounded-xl text-center">
                 ✓ {signOffState.message}
               </div>
             )}
@@ -505,7 +505,7 @@ export default function CandidateAgentRoom({ navigate }) {
 
         {/* ── MODE 2: Roster & Room Accreditation Panel ── */}
         {observerViewMode === 'roster' && (
-          <div className="bg-slate-955/80 border border-slate-800/80 rounded-2xl p-1.5 sm:p-3 shadow-2xl backdrop-blur-md">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-1.5 sm:p-3 shadow-sm dark:shadow-xl backdrop-blur-md transition-colors">
             <RoomMembersPanel
               room={context?.room || { id: context?.room_id || 'room-demo', room_name: electionTitle + ' Observer Room', room_code: context?.room_code || 'RM-9821A', is_locked: isRoomClosed }}
               election={{ id: context?.election_id || 'src', title: electionTitle, tier: 'SRC' }}
@@ -545,16 +545,16 @@ export function CandidateAgentObserverDemo({ room, election, candidates }) {
   };
 
   return (
-    <div className="bg-slate-950/70 border border-slate-800/80 text-slate-100 p-4 sm:p-5 rounded-2xl shadow-2xl space-y-5 selection:bg-emerald-500 selection:text-slate-950 font-sans backdrop-blur-md">
+    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 p-4 sm:p-5 rounded-2xl shadow-sm dark:shadow-xl space-y-5 font-sans backdrop-blur-md transition-colors">
       
       {/* Banner Header */}
-      <div className="border-b border-slate-850 pb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+      <div className="border-b border-slate-100 dark:border-slate-800 pb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
-          <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-wider">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-[#007A4D] dark:text-emerald-400 text-[10px] font-bold uppercase tracking-wider">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             Accredited Polling Agent Live Telemetry Stream
           </div>
-          <h2 className="text-base sm:text-lg font-black text-white mt-2 m-0 tracking-tight font-display">
+          <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-2 m-0 tracking-tight">
             OBSERVER CONSOLE SCREEN
           </h2>
         </div>
@@ -563,48 +563,48 @@ export function CandidateAgentObserverDemo({ room, election, candidates }) {
           <span className={`px-2.5 py-1 rounded-md text-[10px] font-extrabold border uppercase tracking-wider ${statusBadge.bg}`}>
             ● {statusBadge.label}
           </span>
-          <span className="px-2.5 py-1 rounded-md text-[10px] font-extrabold bg-emerald-950/60 border border-emerald-800/80 text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+          <span className="px-2.5 py-1 rounded-md text-[10px] font-extrabold bg-emerald-50 border border-emerald-200 text-emerald-800 dark:bg-emerald-950/60 dark:border-emerald-800/80 dark:text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
             EC Certified Stream
           </span>
         </div>
       </div>
 
       {/* Election & Logged In Meta */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-900/60 border border-slate-855 p-4 rounded-xl text-xs font-sans">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 p-4 rounded-xl text-xs font-sans">
         <div className="space-y-0.5">
-          <span className="text-slate-500 block uppercase font-bold tracking-wider text-[9px]">Scope &amp; Room:</span>
-          <strong className="text-emerald-400 text-sm">{electionTitle}</strong>
-          <div className="text-slate-400 text-[11px] mt-0.5">{roomName} <code className="text-slate-300 font-mono">[{roomCode}]</code></div>
+          <span className="text-slate-500 dark:text-slate-400 block uppercase font-bold tracking-wider text-[9px]">Scope &amp; Room:</span>
+          <strong className="text-[#007A4D] dark:text-emerald-400 text-sm">{electionTitle}</strong>
+          <div className="text-slate-600 dark:text-slate-400 text-[11px] mt-0.5">{roomName} <code className="text-slate-700 dark:text-slate-300 font-mono">[{roomCode}]</code></div>
         </div>
         <div className="space-y-0.5">
-          <span className="text-slate-500 block uppercase font-bold tracking-wider text-[9px]">Simulated Agent:</span>
-          <strong className="text-amber-400 text-sm">Agent — {firstCandidate}</strong>
-          <div className="text-slate-400 text-[11px] mt-0.5">Accredited Candidate Representative</div>
+          <span className="text-slate-500 dark:text-slate-400 block uppercase font-bold tracking-wider text-[9px]">Simulated Agent:</span>
+          <strong className="text-amber-700 dark:text-amber-400 text-sm">Agent — {firstCandidate}</strong>
+          <div className="text-slate-600 dark:text-slate-400 text-[11px] mt-0.5">Accredited Candidate Representative</div>
         </div>
       </div>
 
       {/* ── Real-Time Turnout Progress ── */}
-      <div className="space-y-3 bg-slate-900/40 border border-slate-855 p-4 sm:p-5 rounded-xl">
-        <h3 className="text-xs font-black uppercase tracking-wider text-emerald-400 m-0 flex items-center gap-2">
+      <div className="space-y-3 bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 p-4 sm:p-5 rounded-xl">
+        <h3 className="text-xs font-black uppercase tracking-wider text-[#007A4D] dark:text-emerald-400 m-0 flex items-center gap-2">
           <span>📊</span> Real-Time Turnout Progress
         </h3>
 
         <div className="flex items-baseline justify-between pt-1">
-          <span className="text-xs text-slate-400 font-semibold">Total Valid Ballots Tallied:</span>
-          <span className="text-2xl font-black text-white font-mono tracking-tight">
+          <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold">Total Valid Ballots Tallied:</span>
+          <span className="text-2xl font-black text-slate-900 dark:text-white font-mono tracking-tight">
             {Number(turnout).toLocaleString()}
           </span>
         </div>
 
         {/* Graphical Progress Bar */}
         <div className="space-y-1 pt-1.5">
-          <div className="w-full bg-slate-950 border border-slate-855 h-3 rounded-full overflow-hidden p-0.5 shadow-inner">
-            <div className="bg-gradient-to-r from-emerald-600 to-teal-400 h-full rounded-full" style={{ width: `${turnoutPercentage}%` }} />
+          <div className="w-full bg-slate-200 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 h-3 rounded-full overflow-hidden p-0.5 shadow-inner">
+            <div className="bg-gradient-to-r from-[#007A4D] to-teal-400 h-full rounded-full" style={{ width: `${turnoutPercentage}%` }} />
           </div>
-          <div className="flex justify-between items-center text-[10px] font-bold text-slate-500 font-mono tracking-wider pt-0.5">
+          <div className="flex justify-between items-center text-[10px] font-bold text-slate-500 dark:text-slate-400 font-mono tracking-wider pt-0.5">
             <span>0%</span>
-            <span className="bg-emerald-500/10 text-emerald-450 border border-emerald-500/20 px-2 py-0.5 rounded-md font-sans font-bold">
+            <span className="bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/20 px-2 py-0.5 rounded-md font-sans font-bold">
               {turnoutPercentage}% Overall Turnout
             </span>
             <span>100%</span>
@@ -613,8 +613,8 @@ export function CandidateAgentObserverDemo({ room, election, candidates }) {
       </div>
 
       {/* ── Cryptographic Verification Ledger ── */}
-      <div className="space-y-3 bg-slate-900/40 border border-slate-855 p-4 sm:p-5 rounded-xl">
-        <h3 className="text-xs font-black uppercase tracking-wider text-emerald-400 m-0 flex items-center gap-2">
+      <div className="space-y-3 bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 p-4 sm:p-5 rounded-xl">
+        <h3 className="text-xs font-black uppercase tracking-wider text-[#007A4D] dark:text-emerald-400 m-0 flex items-center gap-2">
           <span>🔐</span> Cryptographic verification ledger
         </h3>
 
@@ -622,18 +622,18 @@ export function CandidateAgentObserverDemo({ room, election, candidates }) {
           {recentHashes.map((item, index) => (
             <div
               key={index}
-              className="flex items-center justify-between p-3 rounded-xl bg-slate-950/65 border border-slate-855 text-xs hover:border-emerald-500/30 transition-colors shadow-xs"
+              className="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-slate-900/65 border border-slate-200 dark:border-slate-700 text-xs hover:border-[#007A4D]/40 transition-colors shadow-2xs"
             >
               <div className="flex items-center gap-2.5">
                 <div className="w-2 h-2 rounded-full bg-emerald-500" />
                 <div>
-                  <span className="text-[9px] text-slate-550 block font-bold uppercase tracking-wider">Audit Block</span>
-                  <code className="text-emerald-300 font-mono font-bold block text-xs mt-0.5">#{item.hash}</code>
+                  <span className="text-[9px] text-slate-500 dark:text-slate-400 block font-bold uppercase tracking-wider">Audit Block</span>
+                  <code className="text-[#007A4D] dark:text-emerald-300 font-mono font-bold block text-xs mt-0.5">#{item.hash}</code>
                 </div>
               </div>
               <div className="flex flex-col items-end gap-1">
-                <span className="text-slate-500 font-mono text-[10px]">{item.timestamp}</span>
-                <span className="px-2 py-0.5 rounded-md bg-emerald-950 border border-emerald-800 text-emerald-400 text-[9px] font-black uppercase tracking-wider">
+                <span className="text-slate-400 dark:text-slate-500 font-mono text-[10px]">{item.timestamp}</span>
+                <span className="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 dark:bg-emerald-950 dark:border-emerald-800 dark:text-emerald-400 text-[9px] font-black uppercase tracking-wider">
                   ✓ {item.status}
                 </span>
               </div>
@@ -643,7 +643,7 @@ export function CandidateAgentObserverDemo({ room, election, candidates }) {
       </div>
 
       {/* ── Privacy Notice ── */}
-      <div className="flex items-start gap-3 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs leading-relaxed">
+      <div className="flex items-start gap-3 p-4 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-amber-900 dark:text-amber-300 text-xs leading-relaxed">
         <span className="text-base shrink-0">⚠️</span>
         <p className="m-0 font-medium">
           <strong>Voter Secrecy Enforced:</strong> Candidate agent consoles show total aggregated voter counts and audit block proofs only. Decrypted final counts release post-poll under authorized EC keys.
@@ -651,10 +651,10 @@ export function CandidateAgentObserverDemo({ room, election, candidates }) {
       </div>
 
       {/* ── Candidate Agent Sign-Off Area ── */}
-      <div className="pt-2 border-t border-slate-855 flex flex-col sm:flex-row items-center justify-between gap-4 font-sans">
-        <div className="text-xs text-slate-400 font-medium">
+      <div className="pt-2 border-t border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row items-center justify-between gap-4 font-sans">
+        <div className="text-xs text-slate-500 dark:text-slate-400 font-medium">
           {isRoomClosed ? (
-            <span className="text-emerald-400 font-bold">Polls Closed — Audit Sign-Off Activated</span>
+            <span className="text-[#007A4D] dark:text-emerald-400 font-bold">Polls Closed — Audit Sign-Off Activated</span>
           ) : (
             <span>Polls Open — Continuous Ledger Audit Active</span>
           )}
@@ -664,7 +664,7 @@ export function CandidateAgentObserverDemo({ room, election, candidates }) {
           <button
             onClick={handleSignOff}
             disabled={signOffState.signed}
-            className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-extrabold text-xs shadow-md transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed min-h-[44px]"
+            className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-[#007A4D] hover:bg-[#075C42] text-white font-extrabold text-xs shadow-md transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed min-h-[44px]"
           >
             {signOffState.signed ? '✓ Verification Signed Off' : 'Simulate Agent Sign-Off'}
           </button>
@@ -672,7 +672,7 @@ export function CandidateAgentObserverDemo({ room, election, candidates }) {
       </div>
 
       {signOffState.message && (
-        <div className="text-xs text-emerald-400 font-bold bg-emerald-950/60 border border-emerald-800 p-3 rounded-xl text-center">
+        <div className="text-xs text-emerald-800 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 p-3 rounded-xl text-center">
           ✓ {signOffState.message}
         </div>
       )}
