@@ -251,8 +251,8 @@ export default function Sidebar({
                 <span className="text-[10px] font-semibold leading-tight truncate w-full">Results</span>
               </a>
 
-              {/* EC Admin / Observer */}
-              {hasECAccess || currentView === 'ec-admin' ? (
+              {/* EC Admin (only when authorized) */}
+              {(hasECAccess || currentView === 'ec-admin') && (
                 <a
                   href="#ec-admin"
                   onClick={e => go(e, '/ec-admin')}
@@ -261,16 +261,6 @@ export default function Sidebar({
                 >
                   <ShieldCheck className="w-5 h-5 flex-shrink-0" />
                   <span className="text-[10px] font-semibold leading-tight truncate w-full">Admin</span>
-                </a>
-              ) : (
-                <a
-                  href="#candidate-agent"
-                  onClick={e => go(e, '/candidate-agent')}
-                  className={getItemClassMini('/candidate-agent')}
-                  title="Observer Room"
-                >
-                  <Eye className="w-5 h-5 flex-shrink-0" />
-                  <span className="text-[10px] font-semibold leading-tight truncate w-full">Observer</span>
                 </a>
               )}
 
@@ -364,22 +354,22 @@ export default function Sidebar({
                 </a>
               </li>
 
-              {/* EC Admin */}
-              <li className="sidebar-subitem">
-                <a
-                  href="#ec-admin"
-                  onClick={e => go(e, '/ec-admin')}
-                  className={getItemClassExpanded('/ec-admin')}
-                >
-                  <ShieldCheck className="w-4 h-4 flex-shrink-0 text-slate-500 dark:text-slate-400" />
-                  <span>EC Admin Console</span>
-                  {hasECAccess && (
+              {/* EC Admin (only when authorized) */}
+              {(hasECAccess || currentView === 'ec-admin') && (
+                <li className="sidebar-subitem">
+                  <a
+                    href="#ec-admin"
+                    onClick={e => go(e, '/ec-admin')}
+                    className={getItemClassExpanded('/ec-admin')}
+                  >
+                    <ShieldCheck className="w-4 h-4 flex-shrink-0 text-slate-500 dark:text-slate-400" />
+                    <span>EC Admin Console</span>
                     <span className="ml-auto bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300 text-[9px] font-bold px-1.5 py-0.5 rounded">
                       EC
                     </span>
-                  )}
-                </a>
-              </li>
+                  </a>
+                </li>
+              )}
 
               {/* Observer Room */}
               <li className="sidebar-subitem">

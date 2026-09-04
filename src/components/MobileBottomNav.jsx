@@ -70,18 +70,20 @@ export default function MobileBottomNav({
         <span>Results</span>
       </a>
 
-      {/* 4. EC Admin / Observer */}
-      <a
-        href="#admin"
-        onClick={(e) => handleNav(e, hasECAccess || currentView === 'ec-admin' ? '/ec-admin' : '/candidate-agent')}
-        className={`mobile-nav-item flex-1 ${isAdmin ? 'active' : ''}`}
-        aria-current={isAdmin ? 'page' : undefined}
-      >
-        <div className="mobile-nav-icon-wrap">
-          <ShieldCheck size={18} />
-        </div>
-        <span>{hasECAccess || currentView === 'ec-admin' ? 'Admin' : 'Observer'}</span>
-      </a>
+      {/* 4. EC Admin (only when authorized) */}
+      {(hasECAccess || currentView === 'ec-admin') && (
+        <a
+          href="#admin"
+          onClick={(e) => handleNav(e, '/ec-admin')}
+          className={`mobile-nav-item flex-1 ${isAdmin ? 'active' : ''}`}
+          aria-current={isAdmin ? 'page' : undefined}
+        >
+          <div className="mobile-nav-icon-wrap">
+            <ShieldCheck size={18} />
+          </div>
+          <span>Admin</span>
+        </a>
+      )}
 
       {/* 5. Menu / More Drawer */}
       <button

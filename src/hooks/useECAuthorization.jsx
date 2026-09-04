@@ -17,6 +17,17 @@ function getActiveAdminPreset() {
  * Detects if the current user has EC administrative rights for any jurisdiction
  * Also tracks their personal vote status in each election
  */
+function getSessionIsOfficer() {
+  try {
+    const raw = localStorage.getItem('knust_user_session');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && parsed.isEcOfficer === true) return true;
+    }
+  } catch (e) {}
+  return false;
+}
+
 export default function useECAuthorization() {
   const [ecRole, setEcRole] = useState(() => {
     const p = getActiveAdminPreset();
@@ -30,7 +41,7 @@ export default function useECAuthorization() {
     const p = getActiveAdminPreset();
     return p.assignedJurisdiction.name;
   });
-  const [hasECAccess, setHasECAccess] = useState(true);
+  const [hasECAccess, setHasECAccess] = useState(getSessionIsOfficer);
   const [voteStatus, setVoteStatus] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -38,15 +49,22 @@ export default function useECAuthorization() {
 
   useEffect(() => {
     const handleProfileChange = (e) => {
-      if (e.detail) {
-        const p = e.detail;
+      const profile = e.detail;
+      const isOfficer = Boolean(profile && profile.isEcOfficer === true);
+      setHasECAccess(isOfficer);
+      if (isOfficer) {
+        const p = getActiveAdminPreset();
         setEcRole(p.roleTitle);
         setEcJurisdictionId(p.assignedJurisdiction.id);
         setEcJurisdictionName(p.assignedJurisdiction.name);
       }
     };
+    window.addEventListener('knust_demo_profile_changed', handleProfileChange);
     window.addEventListener('knust_ec_admin_profile_changed', handleProfileChange);
-    return () => window.removeEventListener('knust_ec_admin_profile_changed', handleProfileChange);
+    return () => {
+      window.removeEventListener('knust_demo_profile_changed', handleProfileChange);
+      window.removeEventListener('knust_ec_admin_profile_changed', handleProfileChange);
+    };
   }, []);
 
   // Fetch EC authorization + vote status
@@ -59,10 +77,13 @@ export default function useECAuthorization() {
         const { data: { user }, error: authError } = await supabase.auth.getUser();
         if (authError || !user) {
           if (mounted) {
-            setEcRole(activePreset.roleTitle);
-            setEcJurisdictionId(activePreset.assignedJurisdiction.id);
-            setEcJurisdictionName(activePreset.assignedJurisdiction.name);
-            setHasECAccess(true);
+            const isOfficer = getSessionIsOfficer();
+            setHasECAccess(isOfficer);
+            if (isOfficer) {
+              setEcRole(activePreset.roleTitle);
+              setEcJurisdictionId(activePreset.assignedJurisdiction.id);
+              setEcJurisdictionName(activePreset.assignedJurisdiction.name);
+            }
             setLoading(false);
           }
           return;
@@ -87,18 +108,19 @@ export default function useECAuthorization() {
           }
         } else {
           if (mounted) {
-            setEcRole(activePreset.roleTitle);
-            setEcJurisdictionId(activePreset.assignedJurisdiction.id);
-            setEcJurisdictionName(activePreset.assignedJurisdiction.name);
-            setHasECAccess(true);
+            const isOfficer = getSessionIsOfficer();
+            setHasECAccess(isOfficer);
+            if (isOfficer) {
+              setEcRole(activePreset.roleTitle);
+              setEcJurisdictionId(activePreset.assignedJurisdiction.id);
+              setEcJurisdictionName(activePreset.assignedJurisdiction.name);
+            }
           }
         }
       } catch (err) {
         if (mounted) {
-          setEcRole(activePreset.roleTitle);
-          setEcJurisdictionId(activePreset.assignedJurisdiction.id);
-          setEcJurisdictionName(activePreset.assignedJurisdiction.name);
-          setHasECAccess(true);
+          const isOfficer = getSessionIsOfficer();
+          setHasECAccess(isOfficer);
         }
       } finally {
         if (mounted) setLoading(false);
