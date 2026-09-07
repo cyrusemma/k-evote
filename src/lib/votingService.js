@@ -1,4 +1,5 @@
 import { supabase } from './supabaseClient';
+import { BiometricSessionManager } from './biometrics/BiometricSessionManager';
 
 const VOTED_STORAGE_KEY = 'knust_voted_elections';
 const RECEIPTS_STORAGE_KEY = 'knust_vote_receipts';
@@ -123,9 +124,18 @@ export function subscribeToVoteUpdates(callback) {
 }
 
 /**
- * Submit anonymous vote with graceful offline/local storage fallback
+ * Submit anonymous vote with graceful offline/local storage fallback and biometric token consumption
  */
-export async function submitAnonymousVote({ studentId, electionId, roomId, votes, selections, receiptId, timestamp }) {
+export async function submitAnonymousVote({
+  studentId,
+  electionId,
+  roomId,
+  votes,
+  selections,
+  receiptId,
+  timestamp,
+  verificationToken = null
+}) {
   // Check double-vote state first
   if (isElectionVoted(electionId)) {
     throw {
@@ -149,6 +159,7 @@ export async function submitAnonymousVote({ studentId, electionId, roomId, votes
       p_room_id: roomId,
       p_encrypted_payload: encryptedPayload,
       p_ballot_hash: ballotHash,
+      p_verification_token: verificationToken
     });
 
     if (error) {
@@ -165,6 +176,12 @@ export async function submitAnonymousVote({ studentId, electionId, roomId, votes
           message: 'You have already cast your vote in this election.',
         };
       }
+      if (/token.*reused|token.*expired/i.test(message)) {
+        throw {
+          code: 'INVALID_BIOMETRIC_TOKEN',
+          message: 'Biometric verification session expired or already used. Please reverify your biometrics.',
+        };
+      }
       console.warn('Supabase RPC responded with error, falling back to local state recording:', error);
     } else {
       dbSuccess = true;
@@ -172,11 +189,16 @@ export async function submitAnonymousVote({ studentId, electionId, roomId, votes
     }
   } catch (err) {
     // If strict business rule violation, rethrow for UI notification
-    if (err?.code === 'ROOM_LOCKED' || err?.code === 'DOUBLE_VOTE') {
+    if (err?.code === 'ROOM_LOCKED' || err?.code === 'DOUBLE_VOTE' || err?.code === 'INVALID_BIOMETRIC_TOKEN') {
       throw err;
     }
     // Network / endpoint unreachable / TypeError: Failed to fetch: gracefully fallback to local recording
     console.info('Supabase endpoint unreachable or offline. Recording vote locally in voter ledger.');
+  }
+
+  // Atomically consume biometric token locally
+  if (verificationToken) {
+    BiometricSessionManager.consumeSessionToken(verificationToken);
   }
 
   // Always record vote locally in ledger so voter state and receipt persist
@@ -187,7 +209,8 @@ export async function submitAnonymousVote({ studentId, electionId, roomId, votes
     sha256Hash: ballotHash,
     selections,
     votes,
-    timestamp: finalTimestamp
+    timestamp: finalTimestamp,
+    biometricVerified: Boolean(verificationToken)
   });
 
   return {
@@ -197,7 +220,9 @@ export async function submitAnonymousVote({ studentId, electionId, roomId, votes
     ballotHash,
     receiptId: finalReceiptId,
     timestamp: finalTimestamp,
-    localRecord
+    localRecord,
+    biometricVerified: Boolean(verificationToken)
   };
 }
+
 

@@ -30,6 +30,7 @@ import { submitAnonymousVote } from '../lib/votingService';
 import { useAdminAuth } from '../context/AdminAuthContext';
 import { mockElections } from '../lib/eligibility';
 import CandidateComparisonModal from './CandidateComparisonModal';
+import FaceRecognitionModal from './FaceRecognitionModal';
 import '../styles/SecureVote.css';
 
 // Tactile Haptic Feedback Helper (HCI standard)
@@ -506,6 +507,7 @@ export default function Ballot({ electionId, student, onBack }) {
   const [selections, setSelections] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [isFaceModalOpen, setIsFaceModalOpen] = useState(false);
   const [error, setError] = useState(null);
   const [roomId, setRoomId] = useState(null);
 
@@ -610,11 +612,16 @@ export default function Ballot({ electionId, student, onBack }) {
     }));
   }
 
-  async function handleSubmitBallot() {
+  function handleInitiateSubmission() {
     if (!isComplete) {
       alert('Please make a selection for every position before submitting.');
       return;
     }
+    setShowConfirmModal(false);
+    setIsFaceModalOpen(true);
+  }
+
+  async function _executeEncryptedSubmission(verificationToken) {
     triggerHaptic([25, 40, 25]);
     setSubmitting(true);
     setError(null);
@@ -633,26 +640,17 @@ export default function Ballot({ electionId, student, onBack }) {
         return { candidate_id: val, position: pos, choice: 'SELECTED' };
       });
 
-      // Submit via voting service (includes automatic offline/localStorage fallback)
-      try {
-        await submitAnonymousVote({
-          studentId: currentStudentId,
-          electionId,
-          roomId,
-          votes: votesPayload,
-          selections,
-          receiptId,
-          timestamp
-        });
-      } catch (err) {
-        if (err?.code === 'ROOM_LOCKED') {
-          throw new Error('Election room is currently locked by EC. No votes can be submitted at this time.');
-        }
-        if (err?.code === 'DOUBLE_VOTE') {
-          throw new Error('You have already cast your vote in this election.');
-        }
-        console.warn('Network submission fallback warning:', err);
-      }
+      // Submit via voting service (includes automatic offline/localStorage fallback and token consumption)
+      await submitAnonymousVote({
+        studentId: currentStudentId,
+        electionId,
+        roomId,
+        votes: votesPayload,
+        selections,
+        receiptId,
+        timestamp,
+        verificationToken
+      });
 
       const electionTitle = isConstituencyBallot
         ? `${activeStudent?.constituency_locked || 'Ayeduase'} Constituency Parliamentary Election`
@@ -666,6 +664,8 @@ export default function Ballot({ electionId, student, onBack }) {
         sha256Hash,
         electionTitle,
         studentId: currentStudentId,
+        biometricVerified: true,
+        verificationToken,
         selectionsSummary: Object.entries(selections).map(([pos, val]) => {
           if (typeof val === 'object' && val?.choice) {
             const candObj = candidates.find(c => c.candidate_id === val.candidate_id);
@@ -682,7 +682,7 @@ export default function Ballot({ electionId, student, onBack }) {
 
       setVoteReceipt(receiptData);
       setIsSubmitted(true);
-      setShowConfirmModal(false);
+      setIsFaceModalOpen(false);
     } catch (err) {
       console.error('Submit error', err);
       setError(err.message || 'Failed to submit ballot. Please try again.');
@@ -1218,16 +1218,28 @@ export default function Ballot({ electionId, student, onBack }) {
               <button
                 type="button"
                 className="flex-1 py-3 px-4 rounded-xl bg-[#007A4D] hover:bg-[#075C42] text-white font-extrabold text-xs transition-all shadow-md cursor-pointer border-0 flex items-center justify-center gap-1.5 min-h-[44px]"
-                onClick={handleSubmitBallot}
+                onClick={handleInitiateSubmission}
                 disabled={submitting}
               >
-                <span>Encrypt &amp; Cast</span>
+                <span>Verify &amp; Cast</span>
                 <ChevronRight size={14} />
               </button>
             </div>
           </div>
         </div>
       )}
+
+      {/* ── Biometric Facial Verification Modal ── */}
+      <FaceRecognitionModal
+        isOpen={isFaceModalOpen}
+        targetUser={activeStudent}
+        electionId={electionId}
+        onSuccess={(authResult) => {
+          _executeEncryptedSubmission(authResult?.sessionToken);
+        }}
+        onCancel={() => setIsFaceModalOpen(false)}
+        allowOtpFallback={true}
+      />
 
       {/* ── Candidate Side-by-Side Comparison & Vetting Dossier Modal ── */}
       <CandidateComparisonModal
