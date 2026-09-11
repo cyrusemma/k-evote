@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useTransition } from 'react';
+import { ResultsPortalSkeleton } from './SkeletonLoader';
 import {
   BarChart3,
   Search,
@@ -17,6 +18,7 @@ import {
   ShieldCheck,
   Activity
 } from 'lucide-react';
+
 
 const MOCK_RESULTS = {
   src: {
@@ -112,8 +114,18 @@ export default function StudentResultsPortal({ onBack }) {
   const [selectedElectionKey, setSelectedElectionKey] = useState('src');
   const [receiptSearch, setReceiptSearch] = useState('');
   const [receiptResult, setReceiptResult] = useState(null);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   const activeData = MOCK_RESULTS[selectedElectionKey] || MOCK_RESULTS.src;
+
+  const handleSelectElection = (key) => {
+    setIsTransitioning(true);
+    setSelectedElectionKey(key);
+    setReceiptResult(null);
+    setTimeout(() => {
+      setIsTransitioning(false);
+    }, 280);
+  };
 
   const handleVerifyReceipt = (e) => {
     e.preventDefault();
@@ -161,10 +173,7 @@ export default function StudentResultsPortal({ onBack }) {
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full sm:w-auto">
           <select
             value={selectedElectionKey}
-            onChange={(e) => {
-              setSelectedElectionKey(e.target.value);
-              setReceiptResult(null);
-            }}
+            onChange={(e) => handleSelectElection(e.target.value)}
             className="w-full sm:w-auto px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#007A4D] shadow-2xs min-h-[44px]"
           >
             <option value="src">🏛️ SRC Executive Council</option>
@@ -184,71 +193,79 @@ export default function StudentResultsPortal({ onBack }) {
         </div>
       </div>
 
-      {/* Turnout & Mathematical Integrity Card */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-4">
-        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col justify-between">
-          <div className="flex items-center justify-between text-xs font-bold text-slate-500 uppercase tracking-wider">
-            <span>Total Ballots Cast</span>
-            <Vote size={14} className="text-slate-400" />
-          </div>
-          <div className="mt-2">
-            <span className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 font-mono">
-              {activeData.totalVotesCast.toLocaleString()}
-            </span>
-            <span className="text-xs text-slate-500 block mt-1 font-medium">
-              of {activeData.eligibleVoters.toLocaleString()} eligible voters
-            </span>
-          </div>
-          <div className="mt-3 text-[11px] font-mono text-emerald-600 dark:text-emerald-400 font-bold">
-            ✓ Turnout Rate: {activeData.turnoutPercent}%
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col justify-between">
-          <div className="flex items-center justify-between text-xs font-bold text-slate-500 uppercase tracking-wider">
-            <span>Turnout Progress</span>
-            <Activity size={14} className="text-slate-400 animate-pulse" />
-          </div>
-          <div className="mt-2 space-y-2">
-            <div className="flex items-center justify-between text-xs font-bold">
-              <span className="text-slate-700 dark:text-slate-200">Quorum Met (&gt;50%)</span>
-              <span className="text-[#007A4D] dark:text-emerald-400">{activeData.turnoutPercent}%</span>
+      {isTransitioning ? (
+        <ResultsPortalSkeleton />
+      ) : (
+        <>
+          {/* Turnout & Mathematical Integrity Card */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-4">
+            <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col justify-between">
+              <div className="flex items-center justify-between text-xs font-bold text-slate-500 uppercase tracking-wider">
+                <span>Total Ballots Cast</span>
+                <Vote size={14} className="text-slate-400" />
+              </div>
+              <div className="mt-2">
+                <span className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 font-mono">
+                  {activeData.totalVotesCast.toLocaleString()}
+                </span>
+                <span className="text-xs text-slate-500 block mt-1 font-medium">
+                  of {activeData.eligibleVoters.toLocaleString()} eligible voters
+                </span>
+              </div>
+              <div className="mt-3 text-[11px] font-mono text-emerald-600 dark:text-emerald-400 font-bold">
+                ✓ Turnout Rate: {activeData.turnoutPercent}%
+              </div>
             </div>
-            <div className="results-percentage-track">
-              <div
-                className="results-percentage-fill"
-                style={{ width: `${activeData.turnoutPercent}%` }}
-              />
+
+            <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col justify-between">
+              <div className="flex items-center justify-between text-xs font-bold text-slate-500 uppercase tracking-wider">
+                <span>Turnout Progress</span>
+                <Activity size={14} className="text-slate-400 animate-pulse" />
+              </div>
+              <div className="mt-2 space-y-2">
+                <div className="flex items-center justify-between text-xs font-bold">
+                  <span className="text-slate-700 dark:text-slate-200">Quorum Met (&gt;50%)</span>
+                  <span className="text-[#007A4D] dark:text-emerald-400">{activeData.turnoutPercent}%</span>
+                </div>
+                <div className="results-percentage-track">
+                  <div
+                    className="results-percentage-fill bg-[#007A4D] h-full rounded-full"
+                    style={{ width: `${Math.min(100, activeData.turnoutPercent)}%` }}
+                  />
+                </div>
+              </div>
+              <div className="mt-3 text-[11px] text-slate-400 font-medium">
+                Official Electoral Threshold
+              </div>
+            </div>
+
+            <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col justify-between">
+              <div className="flex items-center justify-between text-xs font-bold text-slate-500 uppercase tracking-wider">
+                <span>Cryptographic State</span>
+                <Lock size={14} className="text-slate-400" />
+              </div>
+              <div className="mt-2">
+                <span className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-1 rounded block truncate">
+                  {activeData.systemHash.substring(0, 24)}...
+                </span>
+                <span className="text-[11px] text-slate-500 block mt-1 font-medium">
+                  SHA-256 Merkle Root Verified
+                </span>
+              </div>
+              <div className="mt-3 text-[11px] text-slate-400 font-medium">
+                Zero Collision Guarantee
+              </div>
             </div>
           </div>
-          <div className="mt-3 text-[11px] text-slate-500 font-medium font-bold">
-            Zero-Knowledge Ballot Decoupling Active
-          </div>
-        </div>
 
-        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col justify-between">
-          <div className="flex items-center justify-between text-xs font-bold text-slate-500 uppercase tracking-wider">
-            <span>Tally Checksum</span>
-            <Hash size={14} className="text-slate-400" />
-          </div>
-          <div className="mt-2">
-            <div className="text-[11px] font-mono bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-2 rounded-lg text-slate-800 dark:text-slate-200 break-all font-bold">
-              {activeData.systemHash}
-            </div>
-          </div>
-          <div className="mt-3 text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
-            ✓ Cryptographic SHA-256 Ledger Verified
-          </div>
-        </div>
-      </div>
+          {/* ── Ballot Receipt Verification Lookup Box ── */}
+          <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 sm:p-6 shadow-xs space-y-4">
+            <div>
+              <h2 className="text-sm font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2 uppercase tracking-wide m-0">
+                <Search size={16} className="text-[#007A4D]" />
+                <span>Verify Personal Ballot Receipt</span>
+              </h2>
 
-      {/* ── Ballot Receipt Verification Lookup Box ── */}
-      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 sm:p-6 shadow-xs space-y-4">
-        <div>
-          <h2 className="text-sm font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2 uppercase tracking-wide m-0">
-            <Search size={16} className="text-[#007A4D]" />
-            <span>Verify Personal Ballot Receipt</span>
-          </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed m-0">
             Enter or paste your anonymous Ballot Receipt Hash (e.g. <code>REC-89A0F2B</code>) issued upon vote submission to confirm your vote was counted.
           </p>

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import useCandidateAgentContext from '../hooks/useCandidateAgentContext';
 import RoomMembersPanel from './RoomMembersPanel';
+import { Skeleton, TelemetryStatSkeleton, AuditLogSkeleton } from './SkeletonLoader';
 import { 
   Eye, 
   Users, 
@@ -140,10 +141,41 @@ export default function CandidateAgentRoom({ navigate }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#F5F7F8] dark:bg-slate-900 text-slate-900 dark:text-slate-100 flex items-center justify-center p-6 font-sans transition-colors duration-200">
-        <div className="flex flex-col items-center gap-3">
-          <RefreshCw className="w-8 h-8 text-[#007A4D] dark:text-emerald-500 animate-spin" />
-          <p className="text-xs text-slate-600 dark:text-slate-400 font-semibold uppercase tracking-wider">Loading Observer Context...</p>
+      <div className="min-h-screen bg-[#F5F7F8] dark:bg-slate-900 text-slate-900 dark:text-slate-100 p-3 sm:p-6 font-sans antialiased transition-colors duration-200">
+        <div className="max-w-5xl mx-auto space-y-6">
+          {/* Skeleton Header */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <Skeleton variant="rounded" className="w-12 h-12" />
+              <div className="space-y-1.5">
+                <Skeleton variant="text" className="w-40 h-5" />
+                <Skeleton variant="text" className="w-64 h-3.5" />
+              </div>
+            </div>
+            <Skeleton variant="rounded" className="w-48 h-10" />
+          </div>
+
+          {/* Skeleton Banner */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 space-y-3">
+            <div className="flex justify-between items-center">
+              <Skeleton variant="pill" className="w-36 h-4" />
+              <Skeleton variant="pill" className="w-24 h-6" />
+            </div>
+            <Skeleton variant="text" className="w-64 h-6" />
+            <Skeleton variant="text" className="w-80 h-4" />
+          </div>
+
+          {/* Skeleton Telemetry Grid */}
+          <TelemetryStatSkeleton count={4} />
+
+          {/* Skeleton Audit Log */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 space-y-4">
+            <div className="flex justify-between items-center">
+              <Skeleton variant="text" className="w-48 h-5" />
+              <Skeleton variant="pill" className="w-20 h-6" />
+            </div>
+            <AuditLogSkeleton count={4} />
+          </div>
         </div>
       </div>
     );
@@ -152,6 +184,7 @@ export default function CandidateAgentRoom({ navigate }) {
   const electionTitle = context?.election_title || '2026 SRC Presidential Election';
   const candidateName = context?.candidate_name || 'Team Candidate A';
   const statusBadge = buildStatusBadge(context?.room_status);
+
 
   return (
     <div className="min-h-screen bg-[#F5F7F8] dark:bg-slate-900 text-slate-900 dark:text-slate-100 p-3 sm:p-6 font-sans antialiased transition-colors duration-200">

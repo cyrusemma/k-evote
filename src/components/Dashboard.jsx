@@ -23,7 +23,9 @@ import DemoProfileSwitcher from './DemoProfileSwitcher';
 import { deriveYearOfStudy, isBiometricVerified, checkElectionEligibility, getElectionStatus, mockElections, mergeWithMockElections, formatUnlockDate } from '../lib/eligibility';
 import { getStoredStudentProfile, subscribeToDemoProfile } from '../lib/demoProfiles';
 import { isElectionVoted, subscribeToVoteUpdates } from '../lib/votingService';
+import { StudentCardSkeleton, ElectionCardSkeleton } from './SkeletonLoader';
 import '../styles/SecureVote.css';
+
 
 // Live countdown formatter
 function formatCountdown(ms) {
@@ -199,77 +201,81 @@ export default function Dashboard({ navigate }) {
       )}
 
       {/* Premium Digital KNUST Student ID Card */}
-      <div className="knust-student-card mb-6">
-        {/* Holographic Watermark Background */}
-        <div className="knust-card-watermark">
-          <GraduationCap size={200} />
-        </div>
+      {loadingSession && !student ? (
+        <StudentCardSkeleton />
+      ) : (
+        <div className="knust-student-card mb-6">
+          {/* Holographic Watermark Background */}
+          <div className="knust-card-watermark">
+            <GraduationCap size={200} />
+          </div>
 
-        <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-          <div className="flex items-start gap-4">
-            {/* Student Photo Placeholder / Icon */}
-            <div className="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white flex-shrink-0 shadow-sm">
-              <User size={32} className="text-[#D4AF37]" />
+          <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div className="flex items-start gap-4">
+              {/* Student Photo Placeholder / Icon */}
+              <div className="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white flex-shrink-0 shadow-sm">
+                <User size={32} className="text-[#D4AF37]" />
+              </div>
+              
+              <div className="flex flex-col">
+                <span className="text-[10px] font-bold text-[#D4AF37] tracking-widest uppercase">STUDENT IDENTITY CARD</span>
+                <h1 className="m-0 text-2xl font-black tracking-tight text-white mt-0.5">
+                  {student ? (student.full_name || student.name || 'Student') : 'Student'}
+                </h1>
+                <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                  <span className="text-[11px] font-semibold bg-white/15 text-white px-2.5 py-0.5 rounded-md border border-white/10">
+                    ID: {student ? (student.studentId || student.student_id || '20894512') : '20894512'}
+                  </span>
+                  <span className="text-[11px] font-semibold bg-[#D4AF37]/20 text-[#FFE082] px-2.5 py-0.5 rounded-md border border-[#D4AF37]/30">
+                    {yearOfStudy === 1 ? 'Level 100 · Freshperson' : `Level ${student?.level || (yearOfStudy * 100)} · Continuing`}
+                  </span>
+                </div>
+              </div>
             </div>
-            
-            <div className="flex flex-col">
-              <span className="text-[10px] font-bold text-[#D4AF37] tracking-widest uppercase">STUDENT IDENTITY CARD</span>
-              <h1 className="m-0 text-2xl font-black tracking-tight text-white mt-0.5">
-                {student ? (student.full_name || student.name || 'Student') : 'Student'}
-              </h1>
-              <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                <span className="text-[11px] font-semibold bg-white/15 text-white px-2.5 py-0.5 rounded-md border border-white/10">
-                  ID: {student ? (student.studentId || student.student_id || '20894512') : '20894512'}
-                </span>
-                <span className="text-[11px] font-semibold bg-[#D4AF37]/20 text-[#FFE082] px-2.5 py-0.5 rounded-md border border-[#D4AF37]/30">
-                  {yearOfStudy === 1 ? 'Level 100 · Freshperson' : `Level ${student?.level || (yearOfStudy * 100)} · Continuing`}
-                </span>
+
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
+              {/* Card Metadata Columns */}
+              <div className="grid grid-cols-2 gap-x-4 sm:gap-x-6 gap-y-1.5 text-xs bg-black/20 backdrop-blur-xs p-3 sm:p-3.5 rounded-xl border border-white/10 font-semibold text-white/90">
+                <div className="text-white/60">COLLEGE:</div>
+                <div className="text-white font-extrabold">{student?.college_code || student?.college || 'COE'}</div>
+                <div className="text-white/60">PROGRAM:</div>
+                <div className="text-white font-extrabold max-w-[140px] sm:max-w-[150px] truncate">{student?.program || 'BSc. Computer Eng.'}</div>
+                <div className="text-white/60">HALL:</div>
+                <div className="text-white font-extrabold">{student?.hall || 'Unity Hall'}</div>
+              </div>
+
+              <div className="flex flex-col sm:flex-col gap-2 flex-shrink-0 w-full sm:w-auto">
+                <DemoProfileSwitcher onProfileChange={setStudent} className="w-full" />
+                <button
+                  id="dashboard-cta-btn"
+                  className="w-full py-3 sm:py-2.5 px-5 rounded-xl bg-[#D4AF37] hover:bg-[#C5A030] active:bg-[#B89220] text-slate-900 font-extrabold text-xs shadow-md hover:shadow-lg transition-all cursor-pointer flex items-center justify-center gap-2 min-h-[44px] touch-active"
+                  onClick={handleCtaClick}
+                >
+                  <Vote size={15} className="flex-shrink-0" />
+                  <span>Go to Secure Vote</span>
+                </button>
               </div>
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
-            {/* Card Metadata Columns */}
-            <div className="grid grid-cols-2 gap-x-4 sm:gap-x-6 gap-y-1.5 text-xs bg-black/20 backdrop-blur-xs p-3 sm:p-3.5 rounded-xl border border-white/10 font-semibold text-white/90">
-              <div className="text-white/60">COLLEGE:</div>
-              <div className="text-white font-extrabold">{student?.college_code || student?.college || 'COE'}</div>
-              <div className="text-white/60">PROGRAM:</div>
-              <div className="text-white font-extrabold max-w-[140px] sm:max-w-[150px] truncate">{student?.program || 'BSc. Computer Eng.'}</div>
-              <div className="text-white/60">HALL:</div>
-              <div className="text-white font-extrabold">{student?.hall || 'Unity Hall'}</div>
-            </div>
-
-            <div className="flex flex-col sm:flex-col gap-2 flex-shrink-0 w-full sm:w-auto">
-              <DemoProfileSwitcher onProfileChange={setStudent} className="w-full" />
-              <button
-                id="dashboard-cta-btn"
-                className="w-full py-3 sm:py-2.5 px-5 rounded-xl bg-[#D4AF37] hover:bg-[#C5A030] active:bg-[#B89220] text-slate-900 font-extrabold text-xs shadow-md hover:shadow-lg transition-all cursor-pointer flex items-center justify-center gap-2 min-h-[44px] touch-active"
-                onClick={handleCtaClick}
-              >
-                <Vote size={15} className="flex-shrink-0" />
-                <span>Go to Secure Vote</span>
-                <ChevronRight size={15} className="flex-shrink-0" />
-              </button>
+          {/* Card Footer Decoration: Gold Chip + Barcode lines */}
+          <div className="relative z-10 flex items-center justify-between mt-6 pt-4 border-t border-white/10">
+            <div className="knust-card-chip" />
+            <div className="knust-card-barcode">
+              <span className="w-[1px] h-full"></span>
+              <span className="w-[3px] h-full"></span>
+              <span className="w-[1px] h-full"></span>
+              <span className="w-[2px] h-full"></span>
+              <span className="w-[4px] h-full"></span>
+              <span className="w-[1px] h-full"></span>
+              <span className="w-[2px] h-full"></span>
+              <span className="w-[1px] h-full"></span>
+              <span className="w-[3px] h-full"></span>
             </div>
           </div>
         </div>
+      )}
 
-        {/* Card Footer Decoration: Gold Chip + Barcode lines */}
-        <div className="relative z-10 flex items-center justify-between mt-6 pt-4 border-t border-white/10">
-          <div className="knust-card-chip" />
-          <div className="knust-card-barcode">
-            <span className="w-[1px] h-full"></span>
-            <span className="w-[3px] h-full"></span>
-            <span className="w-[1px] h-full"></span>
-            <span className="w-[2px] h-full"></span>
-            <span className="w-[4px] h-full"></span>
-            <span className="w-[1px] h-full"></span>
-            <span className="w-[2px] h-full"></span>
-            <span className="w-[1px] h-full"></span>
-            <span className="w-[3px] h-full"></span>
-          </div>
-        </div>
-      </div>
 
       {/* Stats Cards Row */}
       <div className="sv-stats-row mb-6">
@@ -338,9 +344,9 @@ export default function Dashboard({ navigate }) {
             </span>
           </div>
           {loadingElections ? (
-            <p style={{ padding: 16, color: 'var(--sv-text-mid)' }}>
-              Loading elections...
-            </p>
+            <div className="p-4">
+              <ElectionCardSkeleton count={3} />
+            </div>
           ) : elections.length === 0 ? (
             <p style={{ padding: 16, color: 'var(--sv-text-mid)' }}>
               No elections scheduled at this time.
