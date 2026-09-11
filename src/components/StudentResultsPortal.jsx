@@ -370,7 +370,9 @@ export default function StudentResultsPortal({ onBack }) {
           ))}
         </div>
       </div>
-
-    </div>
+    </>
+  )}
+</div>
   );
 }
+
